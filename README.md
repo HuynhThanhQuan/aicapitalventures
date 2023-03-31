@@ -1,2 +1,2 @@
-# macroeconomics
+# MACRO-ECONOMICS
 Marco-economics 
