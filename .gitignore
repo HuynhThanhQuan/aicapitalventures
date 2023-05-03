@@ -1,3 +1,12 @@
+# Keystore
+key/
+client_secrets.json
+credentials.json
+token.json
+
+# Specific files
+record_*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
