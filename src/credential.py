@@ -24,11 +24,11 @@ CRED_FILE = os.environ['AICV_KEY_GDRIVE_CRED']
 TOKEN_FILE = os.environ['AICV_KEY_GDRIVE_TOKEN']
 
 
-def get_read_only_credentials():
-    return get_credentials(SCOPE_READONLY)
+def get_read_only_credentials() -> Credentials:
+    return get_credentials([SCOPE_READONLY])
 
 
-def get_credentials(scopes):
+def get_credentials(scopes) -> Credentials:
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first time.
     creds = None

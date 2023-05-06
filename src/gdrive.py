@@ -21,9 +21,8 @@ os.environ['AICV_DRIVE'] = os.path.join(os.environ['AICV'], 'database', 'drive')
 DRIVE_STORE = os.environ['AICV_DRIVE']
 
 
-def search_transaction_history_files():
-    """Search file in drive location
-    """
+def search_transaction_history_files() -> list[dict]:
+    """Search file in drive location"""
     try:
         service = build('drive', 'v3', credentials=CREDS)
         files = []
@@ -45,7 +44,7 @@ def search_transaction_history_files():
     return files
 
 
-def download_blob_file(file_id, saved_file):
+def download_blob_file(file_id:str, saved_file:str) -> io.FileIO:
     try:
         service = build('drive', 'v3', credentials=CREDS)
         request = service.files().get_media(fileId=file_id)
@@ -62,7 +61,7 @@ def download_blob_file(file_id, saved_file):
     return file
 
 
-def download_TCBS_transaction_history():
+def download_TCBS_transaction_history() -> list[io.FileIO]:
     files = search_transaction_history_files()
     files_info = []
     for i, f in enumerate(files):
