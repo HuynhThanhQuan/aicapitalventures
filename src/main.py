@@ -13,4 +13,6 @@ if __name__=='__main__':
     # print(gdrive.search_transaction_history_files())
     # print(gdrive.download_TCBS_transaction_history())
     # f = tcbs.list_TCBS_transaction_history()[0]
-    print(tcbs.get_latest_transaction_table())
+    df = tcbs.get_latest_transaction_table()
+    # print(df)
+    print(tcbs.correct_data_format(df))

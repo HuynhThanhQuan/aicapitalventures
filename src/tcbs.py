@@ -72,12 +72,18 @@ def export_transaction_table(filepath:str) -> pd.DataFrame:
     skiprows_index = list(range(row_index+1)) + (lower_index.tolist())
     # Reread table with found row_index
     reread_df = pd.read_excel(filepath,skiprows=skiprows_index)
-    print(reread_df.info())
     return reread_df
 
 
 def get_latest_transaction_table():
     latest_file = get_latest_transaction_file()
     if latest_file is not None:
-        
         table = export_transaction_table(latest_file)
+        if table is not None:
+            return table
+    return None
+
+
+def correct_data_format(df:pd.DataFrame) -> pd.DataFrame:
+    df['Ngày GD'] = pd.to_datetime(df['Ngày GD'].str.strip(), format='%d/%m/%Y')
+    return df
