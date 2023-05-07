@@ -1,0 +1,2 @@
+class EditCredentialError(Exception):
+    pass

@@ -7,7 +7,9 @@
 
 import os
 import shutil
+import json
 from datetime import datetime
+from credential_exception import *
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -15,64 +17,195 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # Set initial setup for credential, and token location
 os.environ['AICV_KEY_GDRIVE'] = os.path.join(os.environ['AICV'], 'key', 'gdrive')
 
-SCOPE_EDIT = 'https://www.googleapis.com/auth/drive'
-SCOPE_READONLY = 'https://www.googleapis.com/auth/drive.readonly'
-SCOPE_METADATA = 'https://www.googleapis.com/auth/drive.metadata'
+SCOPE_EDIT      = 'https://www.googleapis.com/auth/drive'
+SCOPE_READONLY  = 'https://www.googleapis.com/auth/drive.readonly'
+SCOPE_METADATA  = 'https://www.googleapis.com/auth/drive.metadata'
 
 
 GDRIVE = os.environ['AICV_KEY_GDRIVE']
 TOKEN_FILE = os.path.join(GDRIVE, 'token.json')
 
 # TOKEN MANAGEMENT
+
+
+class TokenMetadata:
+    """Class to manage all tokens for editing creds"""
+    def __init__(self, metadata_filepath, expiry_duration=3600):
+        self.metadata_filepath=metadata_filepath
+        self.expiry_duration=expiry_duration
+        self.metadata_dir = os.path.dirname(metadata_filepath)
+        self.format_datetime = '%Y-%m-%dT%H:%M:%S.%fZ'
+
+    def init_empty_metadata(self):
+        self.token_id = []                  
+        self.file = {}                
+        self.expiry = {}             
+        self.scopes = {}                     
+        self.metadata = {
+            'token_id': [],
+            'file': {},
+            'expiry': {},
+            'scopes': {}
+        }
+        return self.metadata
+
+    def add_token(self, id:str, scopes:str):
+        curr = datetime.now()
+        self.token_id.append(id)
+        self.file[id] = os.path.join(self.metadata_dir, id + '.json')
+        self.expiry[id] = (curr + self.expiry_duration).strftime(self.format_datetime)
+        self.scopes[id] = scopes
+
+    def remove_token(self, id:str):
+        self.token_id.remove(id)
+        del self.file[id]
+        del self.expiry[id]
+        del self.scopes[id]
+
+    def check_valid_token(self, id:str):
+        if not id in self.token_id:
+            return False
+        curr = datetime.now()
+        expired_time = datetime.strptime(self.expiry[id], self.format_datetime)
+        if curr <= expired_time:
+            return True
+        return False
+
+    def update(self):
+        existed_tokens = self.token_id.copy()
+        for id in existed_tokens:
+            if not self.check_valid_token(id):
+                self.remove_token(id)
+
+    def get_valid_tokenids(self):
+        self.update()
+        return self.token_id
+
+    def trace_tokenId(self, filepath:str):
+        """Return a traced token id of filepath if token-id is added else None"""
+        tokenid = os.path.basename(filepath)
+        tokenid = tokenid.replace('.json', '')
+        if tokenid in self.token_id:
+            return tokenid
+        return None
+
+    def read_metadata(self):
+        json_meta = json.loads(open(self.metadata_filepath, 'r'))
+        self.token_id = json_meta['token_id']
+        self.file = json_meta['file']
+        self.expiry = json_meta['expiry']
+        self.scopes = json_meta['scopes']
+
+    def write_metadata(self):
+        self.metadata = {
+            'token_id': self.token_id,
+            'file': self.file,
+            'expiry': self.expiry,
+            'scopes': self.scopes
+        }
+        with open(self.metadata_filepath,'w') as f:
+            f.write(self.metadata)
+        return self.metadata_filepath
+
+    def write_empty_metadata(self):
+        self.init_empty_metadata()
+        return self.write_metadata()
+
+
 class TokenManagement:
-    def __init__(self):
-        self.default_cred = None
+    def __init__(self, cache_duration=3600):
+        self.default_credentials = None
         self.init_setup()
+        self.init_token_cache(cache_duration=cache_duration)
 
     def init_setup(self):
         self.cred_file = os.path.join(os.environ['AICV_KEY_GDRIVE'], 'client_secret.json')
         self.default_token_file = os.path.join(os.environ['AICV_KEY_GDRIVE'], 'token.json')
-        self.temp_token_file = os.path.join(os.environ['AICV_KEY_GDRIVE'], 'temp_token.json')
 
-    def init_temp_token_memories(self):
-        self.token_id = {}          # mapping tokenID and Credential object, dict(str:Credentials)
-        self.token_file = {}        # mapping tokenID and saved file json, dict(str:str)
-        self.expired_time = {}      # mapping tokenID and expired time, dict(str: datetime.datetime)
-        self.scope = {}             # mapping scope and tokenID, dict(str:str)
+    def init_token_cache(self, cache_duration):
+        """Init token cache"""
+        self.cache_store = os.path.join(GDRIVE, 'tmp')
+        # Init cache
+        if not os.path.exists(self.cache_store):
+            os.mkdir(self.cache_store)
+        self.cache_duration = cache_duration
+        self.scan_token_cache()
 
-    def prune_expired_tokens(self):
-        current = datetime.now()
-        for k, v in self.expired_time.items():
-            if v < current:
-                self.delete_token_id(k)
+    def scan_token_cache(self):
+        # Init TokenMetadata inst to manage all tokens
+        meta_filepath = os.path.join(self.cache_store, 'metadata.json')
+        self.token_metadata = TokenMetadata(meta_filepath, expiry_duration=self.cache_duration)
+        # List all token json files
+        existing_token_files = [i for i in os.listdir(self.cache_store) if 'metadata.json' not in i]
 
-    def delete_token_id(self, id):
-        if self.token_id[id] is not None:
-            os.remove(self.token_id[id])
+        # If no metadata file then delete all existing token files 
+        # and write empty metadata file
+        if not os.path.exists(meta_filepath):
+            for f in existing_token_files:
+                os.remove(os.path.join(self.cache_store,f))
+            self.token_metadata.write_empty_metadata()
 
-    def get(self,):
-        self.prune_expired_tokens()
+        # Read token metadata
+        self.token_metadata.read_metadata()
 
-    def _request_new_token(self, scopes):
+        # Remove all redundant token ids/files that not listed in metadata or not presented in cache storage
+        metadata_tokenids = self.token_metadata.get_valid_tokenids()
+        existing_tokenids = [i.replace('.json', '') for i in existing_token_files]
+        removed_tokenids = (set(existing_tokenids) | set(metadata_tokenids)) - (set(existing_tokenids) & set(metadata_tokenids))
+        for id in removed_tokenids:
+            f = os.path.join(self.cache_store, id + '.json')
+            os.remove(f)
+            self.token_metadata.remove_token(id)
+        
+    def __request_new_token(self, scopes):
         flow = InstalledAppFlow.from_client_secrets_file(self.cred_file, scopes)
         creds = flow.run_local_server(port=0)
         return creds
 
-    def get_default_token(self):
+    def __save_tmp_token(self, creds:Credentials):
+        if creds is not None:
+            token_filepath = os.path.join(self.cache_store, creds.token + '.json')
+            with open(token_filepath, 'w') as token_file:
+                token_file.write(creds.to_json())
+            return token_filepath
+
+    def get_default_credentials(self):
         default_scopes = [SCOPE_READONLY]
         # Reclaim default token
         if os.path.exists(self.default_token_file):
-            self.default_cred = Credentials.from_authorized_user_file(self.default_token_file, default_scopes)
+            self.default_credentials = Credentials.from_authorized_user_file(self.default_token_file)
         # Check valid token
-        if not self.default_cred or not self.default_cred.valid:
-            # Check expired token
-            if self.default_cred and self.default_cred.expired and self.default_cred.refresh_token:
-                self.default_cred.refresh(Request())
+        if not self.default_credentials or not self.default_credentials.valid:
+            # Check expired token and refresh token
+            if self.default_credentials and self.default_credentials.expired and self.default_credentials.refresh_token:
+                # make request with refresh token
+                self.default_credentials.refresh(Request())
             else:
-                # request new token with refresh token
-                self.default_cred = self._request_new_token(default_scopes)
-        return self.default_cred
+                # request new token
+                self.default_credentials = self.__request_new_token(default_scopes)
+        return self.default_credentials
 
+    def get_readonly_credentials(self):
+        return self.get_default_credentials()
+
+    def get_edit_credentials(self):
+        edit_creds = None
+        # Check if TokenMetadata contains valid token for editing creds
+        valid_edit_tokens = self.token_metadata.get_valid_tokenids()
+        if len(valid_edit_tokens) != 0:
+            sel_token = valid_edit_tokens[0]
+            edit_creds = Credentials.from_authorized_user_file(self.default_token_file)
+        else:
+            # Create edit token and store it
+            scopes = [SCOPE_EDIT]
+            edit_creds = self.__request_new_token(scopes)
+            self.__save_tmp_token(edit_creds)
+            self.token_metadata.add_token(edit_creds.token, scopes)
+        if edit_creds is None:
+            raise EditCredentialError
+        return edit_creds
+
+token_management = TokenManagement()
 
 
 def get_credentials(scopes, reset_token=False, saved=False) -> Credentials:
