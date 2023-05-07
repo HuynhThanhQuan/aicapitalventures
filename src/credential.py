@@ -8,7 +8,7 @@
 import os
 import shutil
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from credential_exception import *
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -53,14 +53,20 @@ class TokenMetadata:
         curr = datetime.now()
         self.token_id.append(id)
         self.file[id] = os.path.join(self.metadata_dir, id + '.json')
-        self.expiry[id] = (curr + self.expiry_duration).strftime(self.format_datetime)
+        self.expiry[id] = (curr + timedelta(seconds=self.expiry_duration)).strftime(self.format_datetime)
         self.scopes[id] = scopes
+        self.write_metadata()
 
     def remove_token(self, id:str):
-        self.token_id.remove(id)
-        del self.file[id]
-        del self.expiry[id]
-        del self.scopes[id]
+        if id in self.token_id:
+            self.token_id.remove(id)
+        if id in self.file.keys():
+            del self.file[id]
+        if id in self.expiry.keys():
+            del self.expiry[id]
+        if id in self.scopes.keys():
+            del self.scopes[id]
+        self.write_metadata()
 
     def check_valid_token(self, id:str):
         if not id in self.token_id:
@@ -77,7 +83,7 @@ class TokenMetadata:
             if not self.check_valid_token(id):
                 self.remove_token(id)
 
-    def get_valid_tokenids(self):
+    def get_valid_tokenids(self) -> list:
         self.update()
         return self.token_id
 
@@ -90,7 +96,7 @@ class TokenMetadata:
         return None
 
     def read_metadata(self):
-        json_meta = json.loads(open(self.metadata_filepath, 'r'))
+        json_meta = json.load(open(self.metadata_filepath, 'r'))
         self.token_id = json_meta['token_id']
         self.file = json_meta['file']
         self.expiry = json_meta['expiry']
@@ -104,7 +110,7 @@ class TokenMetadata:
             'scopes': self.scopes
         }
         with open(self.metadata_filepath,'w') as f:
-            f.write(self.metadata)
+            json.dump(self.metadata, f)
         return self.metadata_filepath
 
     def write_empty_metadata(self):
@@ -208,38 +214,9 @@ class TokenManagement:
 token_management = TokenManagement()
 
 
-def get_credentials(scopes, reset_token=False, saved=False) -> Credentials:
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first time.
-    creds = None
-    if reset_token is False:
-        # Reuse token
-        if os.path.exists(TOKEN_FILE):
-            creds = Credentials.from_authorized_user_file(TOKEN_FILE, scopes)
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(CRED_FILE, scopes)
-                creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            if saved:
-                with open(TOKEN_FILE, 'w') as token:
-                    token.write(creds.to_json())
-    else:
-        # Bypass old token and download new token
-        flow = InstalledAppFlow.from_client_secrets_file(CRED_FILE, scopes)
-        creds = flow.run_local_server(port=0)
-        if saved:
-            with open(TOKEN_FILE, 'w') as token:
-                token.write(creds.to_json())
-    return creds
-
-
 def get_read_only_credentials() -> Credentials:
-    return get_credentials([SCOPE_READONLY], reset_token=False, saved=True)
+    return token_management.get_readonly_credentials()
 
 
 def get_edit_credentials() -> Credentials:
-    return get_credentials([SCOPE_EDIT], reset_token=True,saved=False)
+    return token_management.get_edit_credentials()
