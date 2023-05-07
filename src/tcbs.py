@@ -4,14 +4,16 @@ import pandas as pd
 from pathlib import Path
 import re
 from datetime import datetime
+import gdrive
 
 
 DRIVE_STORE = os.environ['AICV_DRIVE']
+VERIFIED_RECORD = os.path.join(DRIVE_STORE, 'Verified_records.xlsx')
 
 
 def list_TCBS_transaction_history() -> list[str]:
     """Return list TCBS transaction history files in default Drive location"""
-    return [os.path.join(DRIVE_STORE,i) for i in os.listdir(DRIVE_STORE)]
+    return [os.path.join(DRIVE_STORE,i) for i in os.listdir(DRIVE_STORE) if 'TCBS_transaction_history' in i]
 
 
 def read_TCBS_transaction_file(filepath: str) -> pd.DataFrame:
@@ -75,15 +77,30 @@ def export_transaction_table(filepath:str) -> pd.DataFrame:
     return reread_df
 
 
-def get_latest_transaction_table():
+def get_latest_transaction_table() -> pd.DataFrame:
     latest_file = get_latest_transaction_file()
     if latest_file is not None:
         table = export_transaction_table(latest_file)
         if table is not None:
+            table = correct_data_format(table)
             return table
     return None
 
 
 def correct_data_format(df:pd.DataFrame) -> pd.DataFrame:
-    df['Ngày GD'] = pd.to_datetime(df['Ngày GD'].str.strip(), format='%d/%m/%Y')
+    if 'Ngày GD' in df.columns:
+        df['Ngày GD'] = pd.to_datetime(df['Ngày GD'].str.strip(), format='%d/%m/%Y')
     return df
+
+
+def export_verified_records():
+    df = get_latest_transaction_table()
+    files = gdrive.search_verified_records()
+    verified_record_df = None
+    if len(files) == 0:
+        # New record
+        verified_record_df = df.copy()
+        verified_record_df.insert(0, 'Khách hàng', [None] * len(df))
+        verified_record_df.to_excel(VERIFIED_RECORD)
+        gdrive.upload_verified_records_gdrive(VERIFIED_RECORD)
+        return verified_record_df
