@@ -84,10 +84,11 @@ def search_verified_records() -> list[dict]:
         files = []
         page_token = None
         while True:
-            response = service.files().list(q="name contains 'Verified_records.xlsx' and mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'",
+            query_statement = f"name = 'Verified_records.xlsx' and parents in '{DRIVE_REMOTE_ID_STORE}' and trashed=false"
+            response = service.files().list(q=query_statement,
                                             spaces='drive',
                                             fields='nextPageToken, '
-                                                   'files(id, name, mimeType)',
+                                                   'files(id, name, mimeType, parents, createdTime)',
                                             pageToken=page_token).execute()
             files.extend(response.get('files', []))
             page_token = response.get('nextPageToken', None)

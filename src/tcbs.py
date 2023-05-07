@@ -99,13 +99,14 @@ def export_verified_records():
     df = get_latest_transaction_table()
     if df is not None:
         files = gdrive.search_verified_records()
-        verified_record_df = None
-        if len(files) == 0:
-            # New record
-            verified_record_df = df.copy()
-            for i in verified_record_df.columns:
-                verified_record_df[i] = verified_record_df[i].astype(str)
-            verified_record_df.insert(0, 'Khách hàng', [None] * len(df))
-            verified_record_df.to_excel(VERIFIED_RECORD)
-            gdrive.upload_verified_records_gdrive(VERIFIED_RECORD)
-            return verified_record_df
+        print(files)
+        # verified_record_df = None
+        # if len(files) == 0:
+        #     # New record
+        #     verified_record_df = df.copy()
+        #     for i in verified_record_df.columns:
+        #         verified_record_df[i] = verified_record_df[i].astype(str)
+        #     verified_record_df.insert(0, 'Khách hàng', [None] * len(df))
+        #     verified_record_df.to_excel(VERIFIED_RECORD)
+        #     gdrive.upload_verified_records_gdrive(VERIFIED_RECORD)
+        #     return verified_record_df
