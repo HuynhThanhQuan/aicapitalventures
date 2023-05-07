@@ -130,7 +130,6 @@ def upload_verified_records_gdrive(filepath:str):
     """Upload file with conversion
     Returns: ID of the file uploaded
     """
-    print('You will be directed to sign-in for upload permission')
     try:
         # create drive api client
         service = build('drive', 'v3', credentials=credential.get_edit_credentials())

@@ -61,6 +61,7 @@ def get_latest_transaction_file() -> str:
     print('No transaction file found')
     return None
 
+
 def export_transaction_table(filepath:str) -> pd.DataFrame:
     df = pd.read_excel(filepath)
     # Find Ma CP index
@@ -100,6 +101,8 @@ def export_verified_records():
     if len(files) == 0:
         # New record
         verified_record_df = df.copy()
+        for i in verified_record_df.columns:
+            verified_record_df[i] = verified_record_df[i].astype(str)
         verified_record_df.insert(0, 'Khách hàng', [None] * len(df))
         verified_record_df.to_excel(VERIFIED_RECORD)
         gdrive.upload_verified_records_gdrive(VERIFIED_RECORD)

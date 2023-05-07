@@ -13,9 +13,9 @@ if __name__=='__main__':
     # cred = credential.get_read_only_credentials()
     # print(cred, cred.token)
     # print(cred.scopes)
-    cred = credential.get_edit_credentials()
-    print(cred, cred.token)
-    print(cred.scopes)
+    # cred = credential.get_edit_credentials()
+    # print(cred, cred.token)
+    # print(cred.scopes)
     
     # print(gdrive.search_transaction_history_files())
     # print(gdrive.download_TCBS_transaction_history())
@@ -23,4 +23,4 @@ if __name__=='__main__':
     # df = tcbs.get_latest_transaction_table()
     # print(df)
     # print(gdrive.search_verified_records())
-    # print(tcbs.export_verified_records())
+    print(tcbs.export_verified_records())
