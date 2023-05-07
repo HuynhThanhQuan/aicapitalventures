@@ -177,6 +177,7 @@ class TokenManagement:
         if creds is not None:
             token_filepath = os.path.join(self.cache_store, creds.token + '.json')
             with open(token_filepath, 'w') as token_file:
+                # TODO: report issue when using token-id for file-name, Win 11 filename not accepting too long character for filename
                 token_file.write(creds.to_json())
             return token_filepath
 
