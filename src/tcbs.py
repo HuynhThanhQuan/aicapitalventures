@@ -5,18 +5,18 @@ from pathlib import Path
 import re
 from datetime import datetime
 import gdrive
-
+from tcbs_exception import *
 
 DRIVE_STORE = os.environ['AICV_DRIVE']
 VERIFIED_RECORD = os.path.join(DRIVE_STORE, 'Verified_records.xlsx')
 
 
-def list_TCBS_transaction_history() -> list[str]:
+def __list_TCBS_transaction_history() -> list[str]:
     """Return list TCBS transaction history files in default Drive location"""
     return [os.path.join(DRIVE_STORE,i) for i in os.listdir(DRIVE_STORE) if 'TCBS_transaction_history' in i]
 
 
-def read_TCBS_transaction_file(filepath: str) -> pd.DataFrame:
+def __read_TCBS_transaction_file(filepath: str) -> pd.DataFrame:
     """Return pd.DataFrame content of transaction file"""
     filepath = Path(filepath)
     ext = filepath.suffix
@@ -27,7 +27,7 @@ def read_TCBS_transaction_file(filepath: str) -> pd.DataFrame:
     return None
 
 
-def extract_export_date(df: pd.DataFrame) -> datetime:
+def __extract_export_date(df: pd.DataFrame) -> datetime:
     first_col = df.iloc[:,0]
     cond_values = first_col.str.contains('Ngày xuất báo cáo').fillna(False)
     row_index = cond_values[cond_values==True].index
@@ -41,28 +41,28 @@ def extract_export_date(df: pd.DataFrame) -> datetime:
     return export_datetime
 
 
-def sort_transaction_files() -> dict:
-    files = list_TCBS_transaction_history()
+def __sort_transaction_files() -> dict:
+    files = __list_TCBS_transaction_history()
     export_map = {}
     for f in files:
-        ct = read_TCBS_transaction_file(f)
+        ct = __read_TCBS_transaction_file(f)
         export_datetime = None
         if ct is not None:
-            export_datetime = extract_export_date(ct)
+            export_datetime = __extract_export_date(ct)
         export_map[f] = export_datetime
     sort_map = {k: v for k, v in sorted(export_map.items(), key=lambda item: item[1])}
     return sort_map
 
 
-def get_latest_transaction_file() -> str:
-    sort_files = sort_transaction_files()
+def __get_latest_transaction_file() -> str:
+    sort_files = __sort_transaction_files()
     if len(sort_files) > 0:
         return list(sort_files.keys())[0]
     print('No transaction file found')
     return None
 
 
-def export_transaction_table(filepath:str) -> pd.DataFrame:
+def __export_corrected_transaction_table(filepath:str) -> pd.DataFrame:
     df = pd.read_excel(filepath)
     # Find Ma CP index
     first_col = df.iloc[:,1]
@@ -79,34 +79,45 @@ def export_transaction_table(filepath:str) -> pd.DataFrame:
 
 
 def get_latest_transaction_table() -> pd.DataFrame:
-    latest_file = get_latest_transaction_file()
+    latest_file = __get_latest_transaction_file()
     if latest_file is not None:
-        table = export_transaction_table(latest_file)
+        table = __export_corrected_transaction_table(latest_file)
         if table is not None:
-            table = correct_data_format(table)
+            table = __correct_data_format(table)
             return table
     return None
 
 
-def correct_data_format(df:pd.DataFrame) -> pd.DataFrame:
+def __correct_data_format(df:pd.DataFrame) -> pd.DataFrame:
     if 'Ngày GD' in df.columns:
         df['Ngày GD'] = pd.to_datetime(df['Ngày GD'].str.strip(), format='%d/%m/%Y')
     return df
 
 
-def export_verified_records():
-    gdrive.download_TCBS_transaction_history()
+def __generate_verified_records_from_TCBS_history_transaction(df:pd.DataFrame) -> pd.DataFrame:
+    verified_record_df = df.copy()
+    for i in verified_record_df.columns:
+        verified_record_df[i] = verified_record_df[i].astype(str)
+    verified_record_df.insert(0, 'Khách hàng', [None] * len(df))
+    verified_record_df.to_excel(VERIFIED_RECORD)
+    return verified_record_df
+
+
+def upload_verified_records():
+    """From latest corrected transaction table, upload it into drive for manual verification"""
     df = get_latest_transaction_table()
-    if df is not None:
-        files = gdrive.search_verified_records()
-        print(files)
-        # verified_record_df = None
-        # if len(files) == 0:
-        #     # New record
-        #     verified_record_df = df.copy()
-        #     for i in verified_record_df.columns:
-        #         verified_record_df[i] = verified_record_df[i].astype(str)
-        #     verified_record_df.insert(0, 'Khách hàng', [None] * len(df))
-        #     verified_record_df.to_excel(VERIFIED_RECORD)
-        #     gdrive.upload_verified_records_gdrive(VERIFIED_RECORD)
-        #     return verified_record_df
+    if df is None:
+        raise TCBSTransactionHistoryNotFound
+    
+    # Search verified records in drive
+    files = gdrive.search_verified_records()
+    verified_record_df = None
+    if len(files) == 0:
+        # New verified records
+        verified_record_df = __generate_verified_records_from_TCBS_history_transaction(df)
+        gdrive.upload_verified_records_gdrive(VERIFIED_RECORD)
+        return verified_record_df
+    else:
+        # TODO: Download, read, compare with current df 
+        # If current df has new transactions then add them into Verified_records and replace it on drive
+        pass

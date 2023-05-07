@@ -1,8 +1,4 @@
-import os
-import setup
-import credential
-import gdrive
-import tcbs
+import aicv
 
 
 if __name__=='__main__':
@@ -24,3 +20,4 @@ if __name__=='__main__':
     # print(df)
     # print(gdrive.search_verified_records())
     print(tcbs.export_verified_records())
+    aicv.run()
