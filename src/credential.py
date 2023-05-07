@@ -57,6 +57,11 @@ class TokenMetadata:
         self.scopes[id] = scopes
         self.write_metadata()
 
+    def get_token_file(self, id:str) -> str:
+        self.update()
+        if id in self.token_id:
+            return self.file[id]
+
     def remove_token(self, id:str):
         if id in self.token_id:
             self.token_id.remove(id)
@@ -195,21 +200,22 @@ class TokenManagement:
         return self.get_default_credentials()
 
     def get_edit_credentials(self):
+        scopes = [SCOPE_EDIT]
         edit_creds = None
         # Check if TokenMetadata contains valid token for editing creds
         valid_edit_tokens = self.token_metadata.get_valid_tokenids()
         if len(valid_edit_tokens) != 0:
             sel_token = valid_edit_tokens[0]
-            edit_creds = Credentials.from_authorized_user_file(self.default_token_file)
+            edit_creds = Credentials.from_authorized_user_file(self.token_metadata.get_token_file(sel_token))
         else:
             # Create edit token and store it
-            scopes = [SCOPE_EDIT]
             edit_creds = self.__request_new_token(scopes)
             self.__save_tmp_token(edit_creds)
             self.token_metadata.add_token(edit_creds.token, scopes)
         if edit_creds is None:
-            raise EditCredentialError
+            raise EditCredentialError('Failed to initial Edit Credential')
         return edit_creds
+
 
 token_management = TokenManagement()
 
