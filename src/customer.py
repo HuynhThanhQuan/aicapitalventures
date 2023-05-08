@@ -53,8 +53,14 @@ class CustomerLifetime:
         self.lifetime['weekday'] = self.lifetime['date'].dt.weekday
         self.lifetime['quarter'] = self.lifetime['date'].dt.quarter
         
-        # Spread capital information in detail
+        # Spread capital data in long format 
         self.capital_detail = self.lifetime.copy()
         self.capital_detail = self.capital_detail.merge(self.capital_history[['Order Time', 'Type', 'Amount']], how='left', left_on='date', right_on='Order Time')
         self.capital_detail = self.capital_detail.drop(columns=['Order Time'])
-        print(self.capital_detail)
+        # print(self.capital_detail)
+
+        # Spread transaction data in long format 
+        self.transaction_detail = self.lifetime.copy()
+        self.transaction_detail = self.transaction_detail.merge(self.transaction_history, how='left', left_on='date', right_on='Ngày GD')
+        self.transaction_detail = self.transaction_detail.drop(columns=['Khách hàng'])
+        print(self.transaction_detail)
