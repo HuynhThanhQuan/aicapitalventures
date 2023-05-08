@@ -1,5 +1,3 @@
-
-import aicv_core
 import aicv_pipeline
 
 """

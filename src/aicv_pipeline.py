@@ -4,14 +4,14 @@ import credential
 import gdrive
 import tcbs
 import pandas as pd
-
+import aicv_core
 
 
 def startup(mode=None):
     if mode=='debug':
         # Debug mode
         print('DEBUG MODE')
-        
+
     else:
         # Prod mode
         print('PROD MODE')
@@ -23,4 +23,4 @@ def startup(mode=None):
 def run_TCBS_analysis():
     TCBS_data = os.environ['AICV_TCBS_TRANSACTION_HISTORY']
     TCBS_data = pd.read_excel(TCBS_data, index_col=0)
-    print(TCBS_data)
+    aicv_core.get_analyzer(security='TCBS').analyze(TCBS_data)

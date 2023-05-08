@@ -78,7 +78,6 @@ def search_transaction_history_files() -> list[dict]:
 
 
 def search_verified_records() -> list[dict]:
-    """Search file in drive location"""
     try:
         service = build('drive', 'v3', credentials=credential.get_read_only_credentials())
         files = []
@@ -99,6 +98,33 @@ def search_verified_records() -> list[dict]:
         print(F'An error occurred: {error}')
         files = None
     return files
+
+
+def search_capital_file() -> list[dict]:
+    try:
+        service = build('drive', 'v3', credentials=credential.get_read_only_credentials())
+        files = []
+        page_token = None
+        while True:
+            query_statement = f"name = 'Capital' and parents in '{DRIVE_REMOTE_ID_STORE}' and trashed=false"
+            response = service.files().list(q=query_statement,
+                                            spaces='drive',
+                                            fields='nextPageToken, '
+                                                   'files(id, name, mimeType, parents, createdTime)',
+                                            pageToken=page_token).execute()
+            files.extend(response.get('files', []))
+            page_token = response.get('nextPageToken', None)
+            if page_token is None:
+                break
+
+    except HttpError as error:
+        print(F'An error occurred: {error}')
+        files = None
+    if files is None or len(files) ==0 :
+        raise FileNotFoundError
+    if len(files) > 1:
+        raise Exception('Too many Capital files found')
+    return files[0]
 
 
 def download_blob_file(file_id:str, saved_file:str) -> io.FileIO:
