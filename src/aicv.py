@@ -31,4 +31,4 @@ This is the system piple of AI Capital Ventures, including 3 mains steps:
 def run():
     # 1. Verification
     gdrive.download_TCBS_transaction_history()
-    tcbs.upload_verified_records()
+    tcbs.upload_reviewed_verified_records()

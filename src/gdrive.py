@@ -111,7 +111,22 @@ def download_blob_file(file_id:str, saved_file:str) -> io.FileIO:
         while done is False:
             status, done = downloader.next_chunk()
             print(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}%')
+    except HttpError as error:
+        print(F'An error occurred: {error}')
+        file = None
+    return file
 
+
+def download_Docs_Editor_file(file_id:str, mimeType:str, saved_file:str):
+    try:
+        service = build('drive', 'v3', credentials=credential.get_read_only_credentials())
+        request = service.files().export_media(fileId=file_id, mimeType=mimeType)
+        file = io.FileIO(saved_file, 'wb')
+        downloader = MediaIoBaseDownload(file, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+            print(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}%')
     except HttpError as error:
         print(F'An error occurred: {error}')
         file = None
@@ -149,3 +164,17 @@ def upload_verified_records_gdrive(filepath:str):
         print(F'An error occurred: {error}')
         file = None
     return file.get('id')
+
+
+def download_verified_record(id, saved_file):
+    file_info = download_Docs_Editor_file(id, mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', saved_file=saved_file)
+    return file_info
+
+
+def delete_gdrive_file(file_id:str):
+    try:
+        service = build('drive', 'v3', credentials=credential.get_edit_credentials())
+        request = service.files().delete(fileId=file_id).execute()
+        print(f'Deleted file with ID "{file_id}"')
+    except HttpError as error:
+        print(F'An error occurred: {error}')

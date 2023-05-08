@@ -7,8 +7,11 @@ from datetime import datetime
 import gdrive
 from tcbs_exception import *
 
+
 DRIVE_STORE = os.environ['AICV_DRIVE']
-VERIFIED_RECORD = os.path.join(DRIVE_STORE, 'Verified_records.xlsx')
+VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Verified_records.xlsx')
+DRIVE_VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Drive_Verified_records.xlsx')
+REVIEWED_VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Review_Verified_records.xlsx')
 
 
 def __list_TCBS_transaction_history() -> list[str]:
@@ -103,21 +106,55 @@ def __generate_verified_records_from_TCBS_history_transaction(df:pd.DataFrame) -
     return verified_record_df
 
 
-def upload_verified_records():
-    """From latest corrected transaction table, upload it into drive for manual verification"""
+def upload_reviewed_verified_records() -> str:
+    """From latest corrected transaction table, upload it into drive for manual verification
+    TCBS transaction history -> Verified_records.xlsx
+    Drive: Verified_records.xlsx -> Drive_Verified_records.xlsx
+    Verified_records.xlsx compare with Drive_Verified_records.xlsx -> Review_Verified_records.xlsx
+    """
     df = get_latest_transaction_table()
     if df is None:
         raise TCBSTransactionHistoryNotFound
     
     # Search verified records in drive
-    files = gdrive.search_verified_records()
-    verified_record_df = None
-    if len(files) == 0:
+    record_files = gdrive.search_verified_records()
+    reviewed_verfied_records_fp = None
+    if len(record_files) == 0:
         # New verified records
-        verified_record_df = __generate_verified_records_from_TCBS_history_transaction(df)
-        gdrive.upload_verified_records_gdrive(VERIFIED_RECORD)
-        return verified_record_df
+        __generate_verified_records_from_TCBS_history_transaction(df)
+        reviewed_verfied_records_fp = VERIFIED_RECORDS
     else:
-        # TODO: Download, read, compare with current df 
-        # If current df has new transactions then add them into Verified_records and replace it on drive
-        pass
+        # TODO: 
+        # 1. Download, read, merge/compare with current df, ff current df has new transactions then add them into Verified_records 
+        # 2. and replace it on drive by a) remove the current, b) upload the new
+        
+        if len(record_files) > 1:
+            raise TCBSTransactionHistoryDuplicated
+        
+        # Download & read this record
+        record = record_files[0]
+        f_info = gdrive.download_verified_record(record['id'], DRIVE_VERIFIED_RECORDS)
+        gdrive_vrecords = pd.read_excel(f_info.name, index_col=0)
+
+        # Merge(compare) with current df on Số hiệu lệnh and KL khớp, merge outer 
+        df['Số hiệu lệnh'] = df['Số hiệu lệnh'].astype(str).str.strip()
+        gdrive_vrecords['Số hiệu lệnh'] = gdrive_vrecords['Số hiệu lệnh'].astype(str).str.strip()
+        merged_df = gdrive_vrecords[['Khách hàng', 'Số hiệu lệnh', 'KL khớp']].merge(df, how='outer', left_on=['Số hiệu lệnh','KL khớp'], right_on=['Số hiệu lệnh','KL khớp'])
+        merged_df = merged_df.sort_values(by='Ngày GD')
+        merged_df = merged_df.reset_index(drop=True)
+        merged_df = merged_df[gdrive_vrecords.columns]
+        # Format to upload drive
+        for c in merged_df.columns:
+            merged_df[c] = merged_df[c].astype(str)
+        merged_df.to_excel(REVIEWED_VERIFIED_RECORDS)
+        reviewed_verfied_records_fp = REVIEWED_VERIFIED_RECORDS
+
+        # Replace the old one
+        gdrive.delete_gdrive_file(record['id'])
+
+    if reviewed_verfied_records_fp is None or not os.path.exists(reviewed_verfied_records_fp):
+        raise ReviewedVerifiedRecordsNotFound
+    gdrive.upload_verified_records_gdrive(reviewed_verfied_records_fp)
+    return reviewed_verfied_records_fp
+
+    

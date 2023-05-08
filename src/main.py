@@ -19,5 +19,5 @@ if __name__=='__main__':
     # df = tcbs.get_latest_transaction_table()
     # print(df)
     # print(gdrive.search_verified_records())
-    print(tcbs.export_verified_records())
+    # print(tcbs.export_verified_records())
     aicv.run()
