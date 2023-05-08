@@ -14,6 +14,9 @@ DRIVE_VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Drive_Verified_records.xlsx'
 REVIEWED_VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Review_Verified_records.xlsx')
 
 
+os.environ['AICV_TCBS_TRANSACTION_HISTORY'] = REVIEWED_VERIFIED_RECORDS
+
+
 def __list_TCBS_transaction_history() -> list[str]:
     """Return list TCBS transaction history files in default Drive location"""
     return [os.path.join(DRIVE_STORE,i) for i in os.listdir(DRIVE_STORE) if 'TCBS_transaction_history' in i]

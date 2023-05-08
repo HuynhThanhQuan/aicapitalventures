@@ -20,4 +20,4 @@ if __name__=='__main__':
     # print(df)
     # print(gdrive.search_verified_records())
     # print(tcbs.export_verified_records())
-    aicv.run()
+    aicv.run(mode='debug')

@@ -1,8 +1,3 @@
-import os
-import setup
-import credential
-import gdrive
-import tcbs
 
 import aicv_core
 import aicv_pipeline
@@ -29,9 +24,16 @@ This is the system piple of AI Capital Ventures, including 3 mains steps:
     3.2 Demostration
 """
 
-def run():
-    # 1. Verification
-    gdrive.download_TCBS_transaction_history()
-    tcbs.upload_reviewed_verified_records()
-    # 2. Insight
+def run(mode=None):
+    """
+    Run AI Capital Venture pipeline includes:
+    1. Startup
+    2. Run TCBS analysis
+    3. Run report
 
+    Input: mode: (None is production mode, 'debug' to run debug mode)
+    """
+    # 1. Verification
+    aicv_pipeline.startup(mode)
+    # 2. Insight
+    aicv_pipeline.run_TCBS_analysis()
