@@ -11,15 +11,16 @@ import aicv_pipeline
 This is the system piple of AI Capital Ventures, including 3 mains steps:
 1. Verification
     1.1 Data synchronize
-        1.1.1 Synchronize TCBS transaction history
-            1.1.1.1 Download latest TCBS transaction history
-                1.1.1.1.1 Download all TCBS transaction history files
-                1.1.1.1.2 Sort datetime in order
-            1.1.1.2 Correct data type format
-            1.1.1.3 Add manually insertion section for owner
-        1.1.2 Verify TCBS transaction history
-            1.1.2.1 Upload corrected TCBS transaction history into Drive
-            1.1.2.2 Wait for manual verification
+        External: exporter must down it from TCBS Invest manually and upload it to Drive
+        Download all available TCBS transaction history 
+        Get latest data by sort in export date
+        Correct data type format
+        Add manually insertion section for auditor
+        Upload corrected TCBS transaction history into Drive
+    1.2 Audit & Review
+        1.2.1 Check missing transaction
+        1.2.2 Replace the latest data in GDrive
+        1.2.3 Wait for manual review
 2. Insight
     2.1 Intepretation
     2.2 Explanation
@@ -32,3 +33,5 @@ def run():
     # 1. Verification
     gdrive.download_TCBS_transaction_history()
     tcbs.upload_reviewed_verified_records()
+    # 2. Insight
+
