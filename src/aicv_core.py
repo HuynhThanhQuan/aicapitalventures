@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 import capital
-import customer
+import customer as cust
 
 
 class SecurityCompanyNotImplementedError(Exception):
@@ -16,7 +16,7 @@ class BaseAnalyzer:
 
 class TCBSAnalyzer(BaseAnalyzer):
     def __init__(self):
-        self.capital = capital.CustomerCapital()
+        self.capital_extractor = capital.CapitalExtractor()
 
     def analyze(self, table):
         if table is None:
@@ -30,10 +30,9 @@ class TCBSAnalyzer(BaseAnalyzer):
 
     def analyze_per_customer(self, customer_data_groups):
         for customer_name, customer_txn_data in customer_data_groups:
-            print(customer_name)
-            customer_capital = self.capital.get_deposit_data(customer_name)
-            # Analyze CustomerLifetime
-            customer.CustomerLifetime(customer_name, customer_capital, customer_txn_data)
+            customer_capital = self.capital_extractor.get_deposit_data(customer_name)
+            # Analyze and get full data info of Customer
+            customer_info = cust.Customer(customer_name, capital_history=customer_capital, transaction_history=customer_txn_data)
 
 
 def get_analyzer(security:str) -> BaseAnalyzer:

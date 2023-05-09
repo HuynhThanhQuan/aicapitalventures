@@ -6,7 +6,8 @@ import pandas as pd
 
 
 DRIVE_STORE = os.environ['AICV_DRIVE']
-class CustomerCapital:
+
+class CapitalExtractor:
     def __init__(self):
         self.download_capital_data()
         self.read()
