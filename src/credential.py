@@ -193,8 +193,10 @@ class TokenManagement:
                 # make request with refresh token
                 self.default_credentials.refresh(Request())
             else:
-                # request new token
+                # request new token & save it
                 self.default_credentials = self.__request_new_token(default_scopes)
+                with open(TOKEN_FILE, 'w') as token_file:
+                    token_file.write(self.default_credentials.to_json())
         return self.default_credentials
 
     def get_readonly_credentials(self):
