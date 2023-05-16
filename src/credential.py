@@ -22,8 +22,6 @@ SCOPE_METADATA  = 'https://www.googleapis.com/auth/drive.metadata'
 GDRIVE = os.environ['AICV_KEY_GDRIVE']
 TOKEN_FILE = os.path.join(GDRIVE, 'token.json')
 
-# TOKEN MANAGEMENT
-
 
 class TokenMetadata:
     """Class to manage all tokens for editing creds"""

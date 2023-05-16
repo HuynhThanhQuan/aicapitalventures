@@ -14,6 +14,9 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
 from gdrive_exception import *
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 DRIVE_LOCAL_STORE = os.environ['AICV_DATABASE_DRIVE']
@@ -39,7 +42,7 @@ def get_remote_AICV_folderID():
                 break
 
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
         files = None
     if len(files) == 0:
         raise AICapitalVenturesRemoteNotFound
@@ -70,7 +73,7 @@ def search_transaction_history_files() -> list[dict]:
                 break
 
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
         files = None
     return files
 
@@ -93,7 +96,7 @@ def search_verified_records() -> list[dict]:
                 break
 
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
         files = None
     return files
 
@@ -116,7 +119,7 @@ def search_capital_file() -> list[dict]:
                 break
 
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
         files = None
     if files is None or len(files) ==0 :
         raise FileNotFoundError
@@ -134,9 +137,9 @@ def download_blob_file(file_id:str, saved_file:str) -> io.FileIO:
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            print(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}%')
+            logger.debug(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}% {file_id}')
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
         file = None
     return file
 
@@ -150,14 +153,15 @@ def download_Docs_Editor_file(file_id:str, mimeType:str, saved_file:str):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            print(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}%')
+            logger.debug(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}% - {file_id}')
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
         file = None
     return file
 
 
 def download_TCBS_transaction_history() -> list[io.FileIO]:
+    logger.info('Request to download all TCB transaction history')
     files = search_transaction_history_files()
     files_info = []
     for i, f in enumerate(files):
@@ -182,10 +186,10 @@ def upload_verified_records_gdrive(filepath:str):
         media = MediaFileUpload(filepath, mimetype='application/vnd.google-apps.spreadsheet',resumable=True)
         file = service.files().create(body=file_metadata, media_body=media,
                                       fields='id').execute()
-        print(F'File with ID: "{file.get("id")}" has been uploaded.')
+        logger.info(F'File with ID: "{file.get("id")}" has been uploaded.')
 
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
         file = None
     return file.get('id')
 
@@ -199,9 +203,9 @@ def delete_gdrive_file(file_id:str):
     try:
         service = build('drive', 'v3', credentials=credential.get_edit_credentials())
         request = service.files().delete(fileId=file_id).execute()
-        print(f'Deleted file with ID "{file_id}"')
+        logger.info(f'Deleted file with ID "{file_id}"')
     except HttpError as error:
-        print(F'An error occurred: {error}')
+        logger.exception(F'An error occurred: {error}')
 
 
 def upload_summary_report(filepath: str):

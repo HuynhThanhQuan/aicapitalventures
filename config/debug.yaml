@@ -1,4 +1,5 @@
 desc: "DEBUG MODE"
+logLevel: 'DEBUG'
 dir:
   root: '/Users/quan/playground/aicv_debug'
   installedFolder: 

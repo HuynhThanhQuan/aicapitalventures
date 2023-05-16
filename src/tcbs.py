@@ -6,6 +6,9 @@ import re
 from datetime import datetime
 import gdrive
 from tcbs_exception import *
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
@@ -26,7 +29,7 @@ def __read_TCBS_transaction_file(filepath: str) -> pd.DataFrame:
     if (ext == '.xlsx') or (ext == '.xls'):
         f_content = pd.read_excel(filepath)
         return f_content
-    print('Inapproriate or Unsupported file format')
+    logger.error('Inapproriate or Unsupported file format')
     return None
 
 
@@ -61,7 +64,7 @@ def __get_latest_transaction_file() -> str:
     sort_files = __sort_transaction_files()
     if len(sort_files) > 0:
         return list(sort_files.keys())[0]
-    print('No transaction file found')
+    logger.error('No transaction file found')
     return None
 
 
@@ -102,7 +105,7 @@ def __generate_verified_records_from_TCBS_history_transaction(df:pd.DataFrame) -
     for i in verified_record_df.columns:
         verified_record_df[i] = verified_record_df[i].astype(str)
     verified_record_df.insert(0, 'Khách hàng', [None] * len(df))
-    verified_record_df.to_excel(VERIFIED_RECORD)
+    verified_record_df.to_excel(VERIFIED_RECORDS)
     return verified_record_df
 
 

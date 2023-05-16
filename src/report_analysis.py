@@ -50,5 +50,6 @@ def export_summary_report(data: dict) -> pd.DataFrame:
         else:
             summary_df = pd.concat([summary_df, perf_report])
     # summary_df = summary_df.fillna(0)
-    summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
+    if summary_df is not None:
+        summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
     return summary_df

@@ -1,4 +1,5 @@
 desc: "PROD MODE"
+logLevel: 'INFO'
 dir:
   root: '/Users/quan/playground/aicv_prod'
   installedFolder: 
