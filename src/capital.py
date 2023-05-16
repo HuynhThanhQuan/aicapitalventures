@@ -5,7 +5,7 @@ import gdrive
 import pandas as pd
 
 
-DRIVE_STORE = os.environ['AICV_DRIVE']
+DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
 
 class CapitalExtractor:
     def __init__(self):

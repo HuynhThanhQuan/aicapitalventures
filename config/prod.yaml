@@ -1,0 +1,10 @@
+desc: "PROD MODE"
+dir:
+  root: '/Users/quan/playground/aicv_prod'
+  installedFolder: 
+    - database
+    - database/drive
+    - key
+    - key/gdrive
+    - key/gdrive/tmp
+    - report

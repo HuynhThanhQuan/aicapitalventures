@@ -1,6 +1,7 @@
-import aicv
+import setup
+setup.startup()
 
 
 if __name__=='__main__':
-    aicv.run(mode='debug')
-    # aicv.run()
+    import aicv
+    aicv.run()

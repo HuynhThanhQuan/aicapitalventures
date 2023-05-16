@@ -20,9 +20,10 @@ This is the system piple of AI Capital Ventures, including 3 mains steps:
 3. Visualization
     3.1 Plotting
     3.2 Demostration
+    3.3 Export
 """
 
-def run(mode=None):
+def run():
     """
     Run AI Capital Venture pipeline includes:
     1. Startup
@@ -32,6 +33,8 @@ def run(mode=None):
     Input: mode: (None is production mode, 'debug' to run debug mode)
     """
     # 1. Verification
-    aicv_pipeline.startup(mode)
+    aicv_pipeline.startup()
     # 2. Insight
     aicv_pipeline.run_TCBS_analysis()
+    # 3. Visualization
+    aicv_pipeline.export_report()

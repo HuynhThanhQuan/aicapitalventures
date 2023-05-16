@@ -14,9 +14,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-# Set initial setup for credential, and token location
-os.environ['AICV_KEY_GDRIVE'] = os.path.join(os.environ['AICV'], 'key', 'gdrive')
-
 SCOPE_EDIT      = 'https://www.googleapis.com/auth/drive'
 SCOPE_READONLY  = 'https://www.googleapis.com/auth/drive.readonly'
 SCOPE_METADATA  = 'https://www.googleapis.com/auth/drive.metadata'
@@ -132,6 +129,8 @@ class TokenManagement:
     def init_setup(self):
         self.cred_file = os.path.join(os.environ['AICV_KEY_GDRIVE'], 'client_secret.json')
         self.default_token_file = os.path.join(os.environ['AICV_KEY_GDRIVE'], 'token.json')
+        if not os.path.exists(self.cred_file):
+            raise CredentialClientSecretFileNotFound("Please authorize this app by providing client_secrets.json")
 
     def init_token_cache(self, cache_duration):
         """Init token cache"""

@@ -16,9 +16,7 @@ from googleapiclient.http import MediaFileUpload
 from gdrive_exception import *
 
 
-os.environ['AICV_DRIVE'] = os.path.join(os.environ['AICV'], 'database', 'drive')
-
-DRIVE_LOCAL_STORE = os.environ['AICV_DRIVE']
+DRIVE_LOCAL_STORE = os.environ['AICV_DATABASE_DRIVE']
 DRIVE_REMOTE_ID_STORE = None
 
 
@@ -204,3 +202,7 @@ def delete_gdrive_file(file_id:str):
         print(f'Deleted file with ID "{file_id}"')
     except HttpError as error:
         print(F'An error occurred: {error}')
+
+
+def upload_summary_report(filepath: str):
+    pass

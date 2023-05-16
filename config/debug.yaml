@@ -1,0 +1,10 @@
+desc: "DEBUG MODE"
+dir:
+  root: '/Users/quan/playground/aicv_debug'
+  installedFolder: 
+    - database
+    - database/drive
+    - key
+    - key/gdrive
+    - key/gdrive/tmp
+    - report
