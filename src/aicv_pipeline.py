@@ -13,7 +13,8 @@ def startup():
 
 
 def run_TCBS_analysis():
-    TCBS_data = pd.read_excel(os.environ['AICV_TCBS_TRANSACTION_HISTORY'], index_col=0)
+    TCBS_txn_fp = os.path.join(os.environ['AICV_DATABASE_DRIVE'], 'Review_Verified_records.xlsx')
+    TCBS_data = pd.read_excel(TCBS_txn_fp, index_col=0)
     aicv_core.get_analyzer(security='TCBS').analyze(TCBS_data)
 
 
