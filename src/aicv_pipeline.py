@@ -11,13 +11,11 @@ def startup(mode=None):
     if mode=='debug':
         # Debug mode
         print('DEBUG MODE')
-
     else:
         # Prod mode
         print('PROD MODE')
         gdrive.download_TCBS_transaction_history()
         tcbs.upload_reviewed_verified_records()
-
 
 
 def run_TCBS_analysis():

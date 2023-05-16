@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 import capital
 import customer as cust
+import report_analysis as rpa
 
 
 class SecurityCompanyNotImplementedError(Exception):
@@ -33,7 +34,7 @@ class TCBSAnalyzer(BaseAnalyzer):
             customer_capital = self.capital_extractor.get_deposit_data(customer_name)
             # Analyze and get full data info of Customer
             customer_info = cust.CustomerLifetime(customer_name, capital_history=customer_capital, transaction_history=customer_txn_data)
-
+            rpa.export_report(customer_info.total_assets_value)
 
 def get_analyzer(security:str) -> BaseAnalyzer:
     if security == 'TCBS':
