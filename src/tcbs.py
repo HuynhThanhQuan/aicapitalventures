@@ -90,7 +90,7 @@ def get_latest_transaction_table() -> pd.DataFrame:
         table = __export_corrected_transaction_table(latest_file)
         if table is not None:
             table = __correct_data_format(table)
-            logger.debug(f'Latest TCB transaction table \n {table}')
+            logger.debug(f'Latest TCB transaction table has {len(table)} records')
             return table
     return None
 
@@ -138,6 +138,7 @@ def upload_reviewed_verified_records() -> str:
         record = record_files[0]
         f_info = gdrive.download_verified_record(record['id'], DRIVE_VERIFIED_RECORDS)
         gdrive_vrecords = pd.read_excel(f_info.name, index_col=0)
+        logger.debug(f'Verified_record (drive) has {len(gdrive_vrecords)} records')
 
         logger.info('Compare TCB txn data (latest) with Verified_records (drive) to get different of "Số hiệu lệnh & KL khớp"')
         # Merge(compare) with current df on Số hiệu lệnh and KL khớp, merge outer 
@@ -160,7 +161,7 @@ def upload_reviewed_verified_records() -> str:
     if reviewed_verfied_records_fp is None or not os.path.exists(reviewed_verfied_records_fp):
         raise ReviewedVerifiedRecordsNotFound
     gdrive.upload_verified_records_gdrive(reviewed_verfied_records_fp)
-    logger.info('Wait for manual review')
+    logger.info('Reviewing verified records is opened for manual assessment')
     return reviewed_verfied_records_fp
 
     

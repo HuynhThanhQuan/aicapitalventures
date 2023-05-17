@@ -6,6 +6,7 @@ logger.setLevel(logging.DEBUG)
 
 
 LOCAL_REPORT_STORAGE = os.environ['AICV_REPORT']
+SUMMARY_REPORT = os.path.join(LOCAL_REPORT_STORAGE, 'Summary.xlsx')
 
 
 def export_total_asset_value_report(data: pd.DataFrame) -> dict:
@@ -51,5 +52,8 @@ def export_summary_report(data: dict) -> pd.DataFrame:
     # summary_df = summary_df.fillna(0)
     if summary_df is not None:
         summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
-    logger.debug(f'Summary report\n{summary_df}')
+        summary_df.to_excel(SUMMARY_REPORT)
+        logger.debug(f'Exported Summary report file at {SUMMARY_REPORT}')
+    else:
+        logger.error('Unable to export summary report, please check it')
     return summary_df

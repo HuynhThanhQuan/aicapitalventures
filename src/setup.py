@@ -3,6 +3,7 @@ import argparse
 import yaml
 import logging
 
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s - %(levelname)-7s - %(name)-15s - %(message)s')
 
@@ -10,7 +11,14 @@ logging.basicConfig(format='%(asctime)s - %(levelname)-7s - %(name)-15s - %(mess
 def set_aicv_env_variable(setup_config, key, value):
     prefix = setup_config['envVarPrefix']
     varkey = f'{prefix}_{key}'
-    os.environ[varkey] = value
+    os.environ[varkey] = str(value)
+
+
+def log_all_AICV_env_vars():
+    # Log all AICV env vars
+    for k, v in os.environ.items():
+        if 'AICV' in k:
+            logger.debug(f'{k:<25} {v}')
 
 
 def startup():
@@ -53,7 +61,10 @@ def startup():
             os.makedirs(fp)
         set_aicv_env_variable(setup_config, key, fp)
 
-    # Print all AICV env vars
-    for k, v in os.environ.items():
-        if 'AICV' in k:
-            logger.debug(f'{k:<25} {v}')
+
+    # Set os environment for some setting configs
+    # Token setting
+    set_aicv_env_variable(setup_config, 'TOKEN_EXPIRY', mode_cfg['tokenSetting']['expiredTime'])
+
+
+    log_all_AICV_env_vars()

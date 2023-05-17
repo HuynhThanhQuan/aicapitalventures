@@ -123,7 +123,7 @@ class TokenMetadata:
 
 
 class TokenManagement:
-    def __init__(self, cache_duration=3600):
+    def __init__(self, cache_duration=300):
         self.default_credentials = None
         self.init_setup()
         self.init_token_cache(cache_duration=cache_duration)
@@ -165,6 +165,7 @@ class TokenManagement:
         existing_tokenids = [i.replace('.json', '') for i in existing_token_files]
         removed_tokenids = (set(existing_tokenids) | set(metadata_tokenids)) - (set(existing_tokenids) & set(metadata_tokenids))
         for id in removed_tokenids:
+            logger.debug(f'Prune token {id}')
             f = os.path.join(self.cache_store, id + '.json')
             os.remove(f)
             self.token_metadata.remove_token(id)
@@ -225,7 +226,7 @@ class TokenManagement:
         return edit_creds
 
 
-token_management = TokenManagement()
+token_management = TokenManagement(cache_duration=int(os.environ['AICV_TOKEN_EXPIRY']))
 
 
 def get_read_only_credentials() -> Credentials:

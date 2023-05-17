@@ -38,6 +38,7 @@ class TCBSAnalyzer(BaseAnalyzer):
 
     def analyze_per_customer(self, customer_data_groups):
         for customer_name, customer_txn_data in customer_data_groups:
+            logger.debug(f'Analyze {customer_name} assets')
             customer_capital = self.capital_extractor.get_deposit_data(customer_name)
             # Analyze and get full data info of Customer
             customer_info = cust.CustomerLifetime(customer_name, capital_history=customer_capital, transaction_history=customer_txn_data)
@@ -45,9 +46,7 @@ class TCBSAnalyzer(BaseAnalyzer):
             self.customer_reports[customer_name] = cust_report
 
     def export_summary_report(self):
-        summary_report = rpa.export_summary_report(self.customer_reports)
-        # summary_report.to_excel()
-        # gdrive.upload_summary_report()
+        rpa.export_summary_report(self.customer_reports)
 
 
 def get_analyzer(security:str) -> BaseAnalyzer:

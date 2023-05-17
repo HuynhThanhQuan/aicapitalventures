@@ -9,3 +9,5 @@ dir:
     - key/gdrive
     - key/gdrive/tmp
     - report
+tokenSetting:
+  expiredTime: 108000
