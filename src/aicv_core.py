@@ -4,6 +4,9 @@ import capital
 import customer as cust
 import report_analysis as rpa
 import gdrive
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 DEFAULT_ANALYZER = None
@@ -49,6 +52,7 @@ class TCBSAnalyzer(BaseAnalyzer):
 
 def get_analyzer(security:str) -> BaseAnalyzer:
     global DEFAULT_ANALYZER
+    logger.info(f'Set {security} Analyzer as default')
     if security == 'TCBS':
         DEFAULT_ANALYZER = TCBSAnalyzer()
         return DEFAULT_ANALYZER

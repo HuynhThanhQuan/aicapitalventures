@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 class CustomerCapitalInvalidError(Exception):
     pass
 
@@ -19,7 +20,7 @@ class CustomerTransactionHistoryInvalidError(Exception):
 
 class CustomerLifetime:
     def __init__(self, full_name, capital_history, transaction_history):
-        logger.debug(full_name)
+        logger.debug(f'{full_name} lifetime info')
         self.full_name = full_name
         self.capital_history=capital_history
         self.transaction_history=transaction_history

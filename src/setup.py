@@ -4,7 +4,7 @@ import yaml
 import logging
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s - %(levelname)-7s - %(name)s - %(message)s')
+logging.basicConfig(format='%(asctime)s - %(levelname)-7s - %(name)-15s - %(message)s')
 
 
 def set_aicv_env_variable(setup_config, key, value):
@@ -27,7 +27,7 @@ def startup():
     app_version = setup_config['version']
     version_control = setup_config['versionControl']
     
-    # Load mode-kind configure
+    # Load mode-params configure
     with open(os.path.join(setup_config['configDir'], setup_config['mode'] + '.yaml'), 'r') as file:
         mode_cfg = yaml.safe_load(file)
     logger.setLevel(mode_cfg['logLevel'])
@@ -57,7 +57,3 @@ def startup():
     for k, v in os.environ.items():
         if 'AICV' in k:
             logger.debug(f'{k:<25} {v}')
-
-
-if __name__ == "__main__":
-    startup()

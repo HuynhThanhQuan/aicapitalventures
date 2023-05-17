@@ -8,3 +8,11 @@ class TCBSTransactionHistoryDuplicated(Exception):
 
 class ReviewedVerifiedRecordsNotFound(Exception):
     pass
+
+
+class TCBTransactionHistoryNotFound(Exception):
+    pass
+
+
+class UnsupportedFileFormat(Exception):
+    pass

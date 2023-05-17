@@ -13,6 +13,10 @@ from credential_exception import *
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 SCOPE_EDIT      = 'https://www.googleapis.com/auth/drive'
 SCOPE_READONLY  = 'https://www.googleapis.com/auth/drive.readonly'
@@ -125,8 +129,8 @@ class TokenManagement:
         self.init_token_cache(cache_duration=cache_duration)
 
     def init_setup(self):
-        self.cred_file = os.path.join(os.environ['AICV_KEY_GDRIVE'], 'client_secret.json')
-        self.default_token_file = os.path.join(os.environ['AICV_KEY_GDRIVE'], 'token.json')
+        self.cred_file = os.path.join(GDRIVE, 'client_secret.json')
+        self.default_token_file = os.path.join(GDRIVE, 'token.json')
         if not os.path.exists(self.cred_file):
             raise CredentialClientSecretFileNotFound("Please authorize this app by providing client_secrets.json")
 
@@ -194,6 +198,9 @@ class TokenManagement:
                 self.default_credentials = self.__request_new_token(default_scopes)
                 with open(TOKEN_FILE, 'w') as token_file:
                     token_file.write(self.default_credentials.to_json())
+        if self.default_credentials is None:
+            raise DefaultCredentialNotInitialError("Default credentials must be not null, please check")
+        logger.debug(f'Use default read-only credentials - {self.default_credentials}')
         return self.default_credentials
 
     def get_readonly_credentials(self):
@@ -213,7 +220,8 @@ class TokenManagement:
             self.__save_tmp_token(edit_creds)
             self.token_metadata.add_token(edit_creds.token, scopes)
         if edit_creds is None:
-            raise EditCredentialError('Failed to initial Edit Credential')
+            raise EditCredentialNotInitialError('Failed to initial Edit Credential')
+        logger.debug(f'Use editing credentials - {edit_creds}')
         return edit_creds
 
 

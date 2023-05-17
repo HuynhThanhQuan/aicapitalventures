@@ -1,9 +1,6 @@
-#
-#
-#
-#
-#
-# Google Workspace & Google Drive supported MIME types: https://developers.google.com/drive/api/guides/mime-types
+"""
+Google Workspace & Google Drive supported MIME types: https://developers.google.com/drive/api/guides/mime-types
+"""
 
 import io
 import os
@@ -23,7 +20,7 @@ DRIVE_LOCAL_STORE = os.environ['AICV_DATABASE_DRIVE']
 DRIVE_REMOTE_ID_STORE = None
 
 
-def get_remote_AICV_folderID():
+def fetch_remote_AICV_folderID():
     global DRIVE_REMOTE_ID_STORE
     """Search file in drive location"""
     try:
@@ -40,23 +37,28 @@ def get_remote_AICV_folderID():
             page_token = response.get('nextPageToken', None)
             if page_token is None:
                 break
-
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         files = None
     if len(files) == 0:
-        raise AICapitalVenturesRemoteNotFound
+        raise AICapitalVenturesRemoteNotFound("Unable to fetch AI Capital Ventures on Drive store")
     elif len(files) > 1:
-        raise AICapitalVenturesRemoteDuplicated
+        raise AICapitalVenturesRemoteDuplicated("Found more than 1 AI Capital Ventures repository")
     else:
         DRIVE_REMOTE_ID_STORE = files[0]['id']
+        logger.debug(f'AI Capital Ventures Drive ID: {DRIVE_REMOTE_ID_STORE}')
 
 
-get_remote_AICV_folderID()
+fetch_remote_AICV_folderID()
 
+
+
+"""
+Service functions
+"""
 
 def search_transaction_history_files() -> list[dict]:
-    """Search file in drive location"""
+    """Search file in Drive"""
     try:
         service = build('drive', 'v3', credentials=credential.get_read_only_credentials())
         files = []
@@ -71,10 +73,10 @@ def search_transaction_history_files() -> list[dict]:
             page_token = response.get('nextPageToken', None)
             if page_token is None:
                 break
-
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         files = None
+    logger.debug(f'Searched "Lịch sử giao dịch cổ phiếu_Huỳnh Thanh Quan" with IDs {[f["id"] for f in files]} in Drive')
     return files
 
 
@@ -94,10 +96,10 @@ def search_verified_records() -> list[dict]:
             page_token = response.get('nextPageToken', None)
             if page_token is None:
                 break
-
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         files = None
+    logger.debug(f'Searched "Verified_records.xlsx" with IDs {[f["id"] for f in files]} in Drive')
     return files
 
 
@@ -117,7 +119,6 @@ def search_capital_file() -> list[dict]:
             page_token = response.get('nextPageToken', None)
             if page_token is None:
                 break
-
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         files = None
@@ -125,6 +126,7 @@ def search_capital_file() -> list[dict]:
         raise FileNotFoundError
     if len(files) > 1:
         raise Exception('Too many Capital files found')
+    logger.debug(f'Searched "Capital" with IDs {[f["id"] for f in files]} in Drive')
     return files[0]
 
 
@@ -137,7 +139,7 @@ def download_blob_file(file_id:str, saved_file:str) -> io.FileIO:
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            logger.debug(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}% {file_id}')
+            logger.debug(F'Download file {os.path.basename(saved_file)} -> {int(status.progress() * 100)}% with file-id: {file_id}')
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         file = None
@@ -153,7 +155,7 @@ def download_Docs_Editor_file(file_id:str, mimeType:str, saved_file:str):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            logger.debug(F'Download file {os.path.basename(saved_file)} {int(status.progress() * 100)}% - {file_id}')
+            logger.debug(F'Download Doc file {os.path.basename(saved_file)} -> {int(status.progress() * 100)}% with file-id: {file_id}')
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         file = None
@@ -161,7 +163,7 @@ def download_Docs_Editor_file(file_id:str, mimeType:str, saved_file:str):
 
 
 def download_TCBS_transaction_history() -> list[io.FileIO]:
-    logger.info('Request to download all TCB transaction history')
+    logger.info('Download all TCB transaction history')
     files = search_transaction_history_files()
     files_info = []
     for i, f in enumerate(files):
@@ -186,8 +188,7 @@ def upload_verified_records_gdrive(filepath:str):
         media = MediaFileUpload(filepath, mimetype='application/vnd.google-apps.spreadsheet',resumable=True)
         file = service.files().create(body=file_metadata, media_body=media,
                                       fields='id').execute()
-        logger.info(F'File with ID: "{file.get("id")}" has been uploaded.')
-
+        logger.info(F'File with ID "{file.get("id")}" has been uploaded.')
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         file = None

@@ -11,15 +11,17 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
-VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Verified_records.xlsx')
-DRIVE_VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Drive_Verified_records.xlsx')
-REVIEWED_VERIFIED_RECORDS = os.path.join(DRIVE_STORE, 'Review_Verified_records.xlsx')
+LOCAL_DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
+VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Verified_records.xlsx')
+DRIVE_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Drive_Verified_records.xlsx')
+REVIEWED_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Review_Verified_records.xlsx')
 
 
 def __list_TCBS_transaction_history() -> list[str]:
-    """Return list TCBS transaction history files in default Drive location"""
-    return [os.path.join(DRIVE_STORE,i) for i in os.listdir(DRIVE_STORE) if 'TCBS_transaction_history' in i]
+    """Return list TCBS transaction history files in local Drive storage"""
+    tcb_files = [os.path.join(LOCAL_DRIVE_STORE,i) for i in os.listdir(LOCAL_DRIVE_STORE) if 'TCBS_transaction_history' in i]
+    logger.debug(f'Found {len(tcb_files)} TCB transaction files in local storage')
+    return tcb_files
 
 
 def __read_TCBS_transaction_file(filepath: str) -> pd.DataFrame:
@@ -29,8 +31,7 @@ def __read_TCBS_transaction_file(filepath: str) -> pd.DataFrame:
     if (ext == '.xlsx') or (ext == '.xls'):
         f_content = pd.read_excel(filepath)
         return f_content
-    logger.error('Inapproriate or Unsupported file format')
-    return None
+    raise UnsupportedFileFormat('Inapproriate or Unsupported file format')
 
 
 def __extract_export_date(df: pd.DataFrame) -> datetime:
@@ -64,8 +65,7 @@ def __get_latest_transaction_file() -> str:
     sort_files = __sort_transaction_files()
     if len(sort_files) > 0:
         return list(sort_files.keys())[0]
-    logger.error('No transaction file found')
-    return None
+    raise TCBTransactionHistoryNotFound('No transaction file found')
 
 
 def __export_corrected_transaction_table(filepath:str) -> pd.DataFrame:
@@ -90,6 +90,7 @@ def get_latest_transaction_table() -> pd.DataFrame:
         table = __export_corrected_transaction_table(latest_file)
         if table is not None:
             table = __correct_data_format(table)
+            logger.debug(f'Latest TCB transaction table \n {table}')
             return table
     return None
 
@@ -101,6 +102,7 @@ def __correct_data_format(df:pd.DataFrame) -> pd.DataFrame:
 
 
 def __generate_verified_records_from_TCBS_history_transaction(df:pd.DataFrame) -> pd.DataFrame:
+    logger.info('Generate Verified_records from latest TCB txn data')
     verified_record_df = df.copy()
     for i in verified_record_df.columns:
         verified_record_df[i] = verified_record_df[i].astype(str)
@@ -115,11 +117,13 @@ def upload_reviewed_verified_records() -> str:
     Drive: Verified_records.xlsx -> Drive_Verified_records.xlsx
     Verified_records.xlsx compare with Drive_Verified_records.xlsx -> Review_Verified_records.xlsx
     """
+    logger.info('Get latest transaction table data')
     df = get_latest_transaction_table()
     if df is None:
-        raise TCBSTransactionHistoryNotFound
+        raise TCBSTransactionHistoryNotFound('Unable to find TCB transaction history')
     
     # Search verified records in drive
+    logger.info('Get Verified_records in Drive')
     record_files = gdrive.search_verified_records()
     reviewed_verfied_records_fp = None
     if len(record_files) == 0:
@@ -127,10 +131,6 @@ def upload_reviewed_verified_records() -> str:
         __generate_verified_records_from_TCBS_history_transaction(df)
         reviewed_verfied_records_fp = VERIFIED_RECORDS
     else:
-        # TODO: 
-        # 1. Download, read, merge/compare with current df, ff current df has new transactions then add them into Verified_records 
-        # 2. and replace it on drive by a) remove the current, b) upload the new
-        
         if len(record_files) > 1:
             raise TCBSTransactionHistoryDuplicated
         
@@ -139,6 +139,7 @@ def upload_reviewed_verified_records() -> str:
         f_info = gdrive.download_verified_record(record['id'], DRIVE_VERIFIED_RECORDS)
         gdrive_vrecords = pd.read_excel(f_info.name, index_col=0)
 
+        logger.info('Compare TCB txn data (latest) with Verified_records (drive) to get different of "Số hiệu lệnh & KL khớp"')
         # Merge(compare) with current df on Số hiệu lệnh and KL khớp, merge outer 
         df['Số hiệu lệnh'] = df['Số hiệu lệnh'].astype(str).str.strip()
         gdrive_vrecords['Số hiệu lệnh'] = gdrive_vrecords['Số hiệu lệnh'].astype(str).str.strip()
@@ -152,12 +153,14 @@ def upload_reviewed_verified_records() -> str:
         merged_df.to_excel(REVIEWED_VERIFIED_RECORDS)
         reviewed_verfied_records_fp = REVIEWED_VERIFIED_RECORDS
 
+        logger.info('Replace the Verified_records (drive) to the updated one')
         # Replace the old one
         gdrive.delete_gdrive_file(record['id'])
 
     if reviewed_verfied_records_fp is None or not os.path.exists(reviewed_verfied_records_fp):
         raise ReviewedVerifiedRecordsNotFound
     gdrive.upload_verified_records_gdrive(reviewed_verfied_records_fp)
+    logger.info('Wait for manual review')
     return reviewed_verfied_records_fp
 
     

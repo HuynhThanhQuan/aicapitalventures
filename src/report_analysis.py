@@ -1,5 +1,8 @@
 import pandas as pd
 import os
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 LOCAL_REPORT_STORAGE = os.environ['AICV_REPORT']
@@ -25,10 +28,6 @@ def export_total_asset_value_report(data: pd.DataFrame) -> dict:
     }
 
 
-def export_customer_performace_report(data: pd.DataFrame) -> pd.DataFrame:
-    pass
-
-
 def analyze_customer_performance(data: pd.DataFrame) -> pd.DataFrame:
     perf_report = data.copy().to_frame().reset_index()
     perf_report['diff'] = perf_report['TotalAssets'].diff()
@@ -52,4 +51,5 @@ def export_summary_report(data: dict) -> pd.DataFrame:
     # summary_df = summary_df.fillna(0)
     if summary_df is not None:
         summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
+    logger.debug(f'Summary report\n{summary_df}')
     return summary_df
