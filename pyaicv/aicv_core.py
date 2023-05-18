@@ -1,18 +1,28 @@
+"""
+Comments
+"""
+
+# Standard
+import logging
+
+# Third party
 import pandas as pd
-from datetime import datetime
+
+# Local app
 import capital
 import customer as cust
 import report_analysis as rpa
 import gdrive
-import logging
+from aicv_exception import *
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
 DEFAULT_ANALYZER = None
 
-class SecurityCompanyNotImplementedError(Exception):
-    pass
+
 
 class BaseAnalyzer:
     def __init__(self):
@@ -58,7 +68,7 @@ def get_analyzer(security:str) -> BaseAnalyzer:
         DEFAULT_ANALYZER = TCBSAnalyzer()
         return DEFAULT_ANALYZER
     else:
-        raise SecurityCompanyNotImplementedError
+        raise SecurityCompanyNotImplementedError(f"Security {security} is not inplemented, please choose other security firm")
 
 
 def get_default_analyzer() -> BaseAnalyzer:
