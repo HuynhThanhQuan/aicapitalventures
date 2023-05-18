@@ -1,14 +1,14 @@
 # Keystore
-key/*
+key/
 client_secret.json
 credentials.json
 token.json
 
 # Specific files
-database
+database/drive
 
-examples/
-
+# VScode
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
