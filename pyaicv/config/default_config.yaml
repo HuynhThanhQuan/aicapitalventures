@@ -1,5 +1,5 @@
 desc: "PROD MODE"
-logLevel: 'INFO'
+logLevel: 'DEBUG'
 dir:
   installedFolder: 
     - database

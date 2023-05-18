@@ -3,7 +3,7 @@ import argparse
 import yaml
 import logging
 
-
+# Setup Logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s - %(levelname)-7s - %(name)-15s - %(message)s')
 
@@ -67,3 +67,6 @@ def startup():
     set_aicv_env_variable(setup_config, 'TOKEN_EXPIRY', mode_cfg['tokenSetting']['expiredTime'])
 
     log_all_AICV_env_vars()
+
+
+startup()
