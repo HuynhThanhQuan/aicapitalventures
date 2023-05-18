@@ -1,6 +1,9 @@
 import pandas as pd
 import os
 import logging
+from . import utils
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -46,7 +49,7 @@ def export_summary_report(data: dict) -> pd.DataFrame:
         perf_report = perf_report[['customer_name', 'date', 'total_assets', 'diff', 'pct_change']]
         # Export customer's performance report
         perf_report_fp = os.path.join(LOCAL_REPORT_STORAGE, 'PerformanceReport_' + cust_name + '.xlsx')
-        perf_report.to_excel(perf_report_fp)
+        utils.convert_strformat_to_save(perf_report).to_excel(perf_report_fp)
         logger.debug(f'Exported Performance Report file of {cust_name} at {perf_report_fp}')
         if summary_df is None:
             summary_df = perf_report.copy()
@@ -55,7 +58,7 @@ def export_summary_report(data: dict) -> pd.DataFrame:
     # summary_df = summary_df.fillna(0)
     if summary_df is not None:
         # summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
-        summary_df.to_excel(SUMMARY_REPORT)
+        utils.convert_strformat_to_save(summary_df).to_excel(SUMMARY_REPORT)
         logger.debug(f'Exported Summary report file at {SUMMARY_REPORT}')
     else:
         logger.error('Unable to export Summary Report, please check it')
