@@ -1,7 +1,11 @@
 version: 0.0.1
-envVarPrefix: 'AICV'
 mode: debug
 project:
   versionControl: True
   root: '/Users/quan/playground/pyaicv'
+envVarPrefix: 'AICV'
 loggingFormat: '%(asctime)s - %(levelname)-7s - %(name)-15s - %(message)s'
+author: 'Huynh Thanh Quan'
+email: 'hthquan28@gmail.com'
+help': 'Please create ticket or sent me email for any issue'
+repo: ''

@@ -21,9 +21,10 @@ def set_aicv_env_variable(setup_config, key, value):
 
 def inspect_AICV_env_vars():
     # Log all AICV env vars
+    logger.debug('PYAICV Environment Variables: ')
     for k, v in os.environ.copy().items():
         if 'AICV' in k:
-            logger.debug(f'{k:<25} {v}')
+            logger.debug(f'\t{k:<25} {v}')
 
 
 def load_setup_config():
@@ -47,9 +48,17 @@ def load_mode_configure(setup_config):
     default_cfg.update(mode_cfg)
     
     logger.setLevel(default_cfg['logLevel'])
-    logger.info('Setup config %s' % setup_config)
-    logger.info('Mode params config %s' % default_cfg)
+    logger.info('==============================================================================================')
+    logger.info('==============================================================================================')
+    logger.info('==============================================================================================')
+    logger.info('SETUP CONFIG')
+    for k, v in setup_config.items():
+        logger.info(f"\t{k:<20}: {v}")
+    logger.info('==============================================================================================')
     logger.info('%s' % default_cfg['desc'])
+    for k, v in default_cfg.items():
+        logger.debug(f"\t\t{k:<20}: {v}")
+    logger.info('==============================================================================================')
     return default_cfg
 
 
