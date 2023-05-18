@@ -10,13 +10,16 @@ from . import analyser as als
 def set_security_firm(security):
     sec_factory.set(security)
 
+
 def run_analysis():
-    als.get_analyser(sec_factory.get_active_security())
-    drive.download_TCBS_transaction_history()
+    als.set_security_analyser(sec_factory.get_active_security())
+    als.run_full_analysis()
     
 
 def export_report():
-    alz.get_default_analyser().export_summary_report()
+    als.export_summary_report()
+
+
 
     # 
     # ops.upload_reviewed_verified_records()

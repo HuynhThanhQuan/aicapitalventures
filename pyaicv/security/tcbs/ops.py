@@ -20,6 +20,21 @@ DRIVE_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Drive_Verified_records
 REVIEWED_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Review_Verified_records.xlsx')
 
 
+class TCBSOperationMangement:
+    def __init__(self):
+        self.data = None
+
+    def __check_data(self):
+        if self.data is None:
+            drive.download_TCBS_transaction_history()
+
+    def get_all_customer_info(self):
+        return self.data
+
+
+TCBS_OPS = TCBSOperationMangement()
+
+
 def __list_TCBS_transaction_history() -> list[str]:
     """Return list TCBS transaction history files in local Drive storage"""
     tcb_files = [os.path.join(LOCAL_DRIVE_STORE,i) for i in os.listdir(LOCAL_DRIVE_STORE) if 'TCBS_transaction_history' in i]
@@ -168,3 +183,5 @@ def upload_reviewed_verified_records() -> str:
     return reviewed_verfied_records_fp
 
     
+def get_all_customer_info():
+    TCBS_OPS.get_all_customer_info()

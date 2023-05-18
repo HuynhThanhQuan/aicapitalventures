@@ -18,3 +18,11 @@ from . import ops
 
 def get_capital_management():
     return capital.CustomerCapital()
+
+
+def get_all_customer_info():
+    return ops.get_all_customer_info()
+
+
+def get_customer_info(name):
+    return ops.get_customer_info(name)

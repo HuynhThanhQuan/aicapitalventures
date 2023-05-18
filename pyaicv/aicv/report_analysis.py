@@ -58,5 +58,5 @@ def export_summary_report(data: dict) -> pd.DataFrame:
         summary_df.to_excel(SUMMARY_REPORT)
         logger.debug(f'Exported Summary report file at {SUMMARY_REPORT}')
     else:
-        logger.error('Unable to export summary Report, please check it')
+        logger.error('Unable to export Summary Report, please check it')
     return summary_df
