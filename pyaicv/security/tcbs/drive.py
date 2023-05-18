@@ -142,7 +142,7 @@ def download_blob_file(file_id:str, saved_file:str) -> io.FileIO:
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            logger.debug(F'Download file {os.path.basename(saved_file)} -> {int(status.progress() * 100)}% with file-id: {file_id}')
+            logger.debug(F'Download file "{os.path.basename(saved_file)}" -> {int(status.progress() * 100)}% with file-id: {file_id}')
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         file = None
@@ -158,7 +158,7 @@ def download_Docs_Editor_file(file_id:str, mimeType:str, saved_file:str):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            logger.debug(F'Download Doc file {os.path.basename(saved_file)} -> {int(status.progress() * 100)}% with file-id: {file_id}')
+            logger.debug(F'Download Doc file "{os.path.basename(saved_file)}" -> {int(status.progress() * 100)}% with file-id: {file_id}')
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
         file = None
@@ -175,7 +175,7 @@ def download_TCBS_transaction_history() -> list[io.FileIO]:
     return files_info
 
 
-def upload_verified_records_gdrive(filepath:str): 
+def upload_verified_records_drive(filepath:str): 
     """Upload file with conversion
     Returns: ID of the file uploaded
     """
@@ -203,7 +203,7 @@ def download_verified_record(id, saved_file):
     return file_info
 
 
-def delete_gdrive_file(file_id:str):
+def delete_drive_file(file_id:str):
     try:
         service = build('drive', 'v3', credentials=credential.get_edit_credentials())
         request = service.files().delete(fileId=file_id).execute()

@@ -4,7 +4,7 @@ project:
   versionControl: True
   root: '/Users/quan/playground/pyaicv'
 envVarPrefix: 'AICV'
-loggingFormat: '%(asctime)s - %(levelname)-7s - %(name)-20s - %(message)s'
+loggingFormat: '%(asctime)s - %(levelname)-7s - %(name)-20s : %(message)s'
 repo:
   url: 'git@github.com:HuynhThanhQuan/aicapitalventures.git'
   author: 'Huynh Thanh Quan'

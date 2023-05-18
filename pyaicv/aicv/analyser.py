@@ -34,7 +34,7 @@ class BaseAnalyser:
 
 class TCBSAnalyser(BaseAnalyser):
     def __init__(self):
-        self.customer_capital = factory.get_active_security().get_capital_management()
+        # self.customer_capital = factory.get_active_security().get_capital_management()
         self.customer_reports = {}
 
     def run_analysis_full_database(self):
@@ -43,18 +43,12 @@ class TCBSAnalyser(BaseAnalyser):
         if all_cust_info is None:
             return None
         table = all_cust_info.copy()
-        # correct table formats
-        table['Ngày GD'] = pd.to_datetime(table['Ngày GD'], format='%Y-%m-%d')
-        table['Số hiệu lệnh'] = table['Số hiệu lệnh'].astype(str)
-        # Group customers
-        customer_data_groups = table.groupby('Khách hàng')
-        for customer_name, customer_txn_data in customer_data_groups:
+        for customer_name in table['Khách hàng'].unique():
             logger.debug(f'Analyze {customer_name} assets')
-            customer_capital = self.customer_capital.get_deposit_data(customer_name)
-            # Analyze and get full data info of Customer
-            customer_info = cust.CustomerLifetime(customer_name, capital_history=customer_capital, transaction_history=customer_txn_data)
+            customer_info = self.get_customer_info(customer_name)
             cust_report = rpa.export_total_asset_value_report(customer_info.total_assets_value)
             self.customer_reports[customer_name] = cust_report
+        logger.debug(f'Completed full Analysis with {len(self.customer_reports)} customers')
 
     def get_customer_info(self, customer_name):
         return factory.get_active_security().get_customer_info(customer_name)
@@ -73,7 +67,7 @@ def set_security_analyser(security_module:str) -> BaseAnalyser:
     global DEFAULT_ANALYSER
     if security_module.NAME == 'TCBS':
         DEFAULT_ANALYSER = TCBSAnalyser()
-        logger.info(f'Set {security_module} Analyser as default')
+        logger.info(f'Set {security_module.NAME}_Analyser as default')
         return DEFAULT_ANALYSER
     else:
         raise SecurityCompanyNotImplementedError(f"Security {security_module.name} is not inplemented, please select other security firm")

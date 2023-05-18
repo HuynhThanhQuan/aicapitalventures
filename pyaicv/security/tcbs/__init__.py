@@ -7,17 +7,15 @@ MAINTAINER = 'Huynh Thanh Quan'
 import sys
 import os
 import importlib
+import logging
 
-# Resolve namespace of security firm modules
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+logger.info(f"{NAME} module is set")
 
 
-from . import capital
-from . import customer
 from . import ops
-
-
-def get_capital_management():
-    return capital.CustomerCapital()
 
 
 def get_all_customer_info():
