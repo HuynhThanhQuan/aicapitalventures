@@ -8,12 +8,16 @@
 import os
 import shutil
 import json
+import logging
 from datetime import datetime, timedelta
-from credential_exception import *
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-import logging
+
+from .credential_exception import *
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -23,7 +27,7 @@ SCOPE_READONLY  = 'https://www.googleapis.com/auth/drive.readonly'
 SCOPE_METADATA  = 'https://www.googleapis.com/auth/drive.metadata'
 
 
-GDRIVE = os.environ['AICV_KEY_GDRIVE']
+GDRIVE = os.environ['AICV_KEY_DRIVE']
 TOKEN_FILE = os.path.join(GDRIVE, 'token.json')
 
 

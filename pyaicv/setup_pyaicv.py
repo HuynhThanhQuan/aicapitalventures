@@ -2,6 +2,7 @@ import os
 import argparse
 import yaml
 import logging
+import sys
 
 
 logger = None
@@ -57,12 +58,15 @@ def load_mode_configure(setup_config):
     logger.info('==============================================================================================')
     logger.info('%s' % default_cfg['desc'])
     for k, v in default_cfg.items():
-        logger.debug(f"\t\t{k:<20}: {v}")
+        logger.debug(f"\t{k:<20}: {v}")
     logger.info('==============================================================================================')
     return default_cfg
 
 
 def setup_project(setup_config, mode_cfg):
+    # Add PyAICV module into sys.path
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+    
     app_version = setup_config['version']
     version_control = setup_config['project']['versionControl']
     # Installed folders with version control setting
@@ -103,5 +107,4 @@ def startup():
     inspect_AICV_env_vars()
 
 
-if __name__ == '__main__':
-    startup()
+startup()

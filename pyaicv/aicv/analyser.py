@@ -9,19 +9,14 @@ import logging
 import pandas as pd
 
 # Local app
-import capital
-import customer as cust
-import report_analysis as rpa
-import gdrive
+from pyaicv.security import factory
 from .exception import *
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
 DEFAULT_ANALYSER = None
-
 
 
 class BaseAnalyser:
@@ -31,9 +26,10 @@ class BaseAnalyser:
     def analyse(self, table:pd.DataFrame):
         pass
 
+
 class TCBSAnalyser(BaseAnalyser):
     def __init__(self):
-        self.capital_extractor = capital.CapitalExtractor()
+        self.customer_capital = factory.get_active_security().get_capital_management()
         self.customer_reports = {}
 
     def analyse(self, table):
@@ -49,7 +45,7 @@ class TCBSAnalyser(BaseAnalyser):
     def analyse_per_customer(self, customer_data_groups):
         for customer_name, customer_txn_data in customer_data_groups:
             logger.debug(f'Analyze {customer_name} assets')
-            customer_capital = self.capital_extractor.get_deposit_data(customer_name)
+            customer_capital = self.customer_capital.get_deposit_data(customer_name)
             # Analyze and get full data info of Customer
             customer_info = cust.CustomerLifetime(customer_name, capital_history=customer_capital, transaction_history=customer_txn_data)
             cust_report = rpa.export_total_asset_value_report(customer_info.total_assets_value)
@@ -61,14 +57,14 @@ class TCBSAnalyser(BaseAnalyser):
         gdrive.update_summary_report()
 
 
-def get_analyser(security:str) -> BaseAnalyser:
+def get_analyser(security_module:str) -> BaseAnalyser:
     global DEFAULT_ANALYSER
-    logger.info(f'Set {security} Analyser as default')
-    if security == 'TCBS':
+    if security_module.NAME == 'TCBS':
         DEFAULT_ANALYSER = TCBSAnalyser()
+        logger.info(f'Set {security_module} Analyser as default')
         return DEFAULT_ANALYSER
     else:
-        raise SecurityCompanyNotImplementedError(f"Security {security} is not inplemented, please choose other security firm")
+        raise SecurityCompanyNotImplementedError(f"Security {security_module.name} is not inplemented, please select other security firm")
 
 
 def get_default_analyser() -> BaseAnalyser:

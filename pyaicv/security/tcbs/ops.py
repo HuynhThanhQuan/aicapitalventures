@@ -2,11 +2,14 @@ import os
 import numpy as np 
 import pandas as pd
 from pathlib import Path
+import logging
 import re
 from datetime import datetime
-import gdrive
-from tcbs_exception import *
-import logging
+
+from .tcbs_exception import *
+from . import drive
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 

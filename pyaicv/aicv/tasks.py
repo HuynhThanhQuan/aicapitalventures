@@ -1,40 +1,6 @@
-import pipeline
-
-"""
-This is the system piple of AI Capital Ventures, including 3 mains steps:
-1. Verification
-    1.1 Data synchronize
-        External: exporter must down it from TCBS Invest manually and upload it to Drive
-        Download all available TCBS transaction history 
-        Get latest data by sort in export date
-        Correct data type format
-        Add manually insertion section for auditor
-        Upload corrected TCBS transaction history into Drive
-    1.2 Audit & Review
-        1.2.1 Check missing transaction
-        1.2.2 Replace the latest data in GDrive
-        1.2.3 Wait for manual review
-2. Insight
-    2.1 Intepretation
-    2.2 Explanation
-3. Visualization
-    3.1 Plotting
-    3.2 Demostration
-    3.3 Export
-"""
+from . import pipeline
 
 def report_TCBS_customer_total_assets():
-    """
-    Run AI Capital Venture pipeline includes:
-    1. Startup
-    2. Run TCBS analysis
-    3. Run report
-
-    Input: mode: (None is production mode, 'debug' to run debug mode)
-    """
-    # 1. Verification
-    pipeline.startup()
-    # 2. Insight
-    pipeline.run_TCBS_analysis()
-    # 3. Visualization
+    pipeline.set_security_firm('TCBS')
+    pipeline.run_analysis()
     pipeline.export_report()

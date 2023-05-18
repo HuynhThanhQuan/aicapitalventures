@@ -4,14 +4,17 @@ Google Workspace & Google Drive supported MIME types: https://developers.google.
 
 import io
 import os
-import credential
+import logging
 import google.auth
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
-from gdrive_exception import *
-import logging
+
+from .drive_exception import *
+from . import credential
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 

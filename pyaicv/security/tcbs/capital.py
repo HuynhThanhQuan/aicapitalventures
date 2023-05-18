@@ -1,13 +1,14 @@
 import os
 from pathlib import Path
 from datetime import datetime
-import gdrive
 import pandas as pd
+
+from . import drive
 
 
 DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
 
-class CapitalExtractor:
+class CustomerCapital:
     def __init__(self):
         self.download_capital_data()
         self.read()
@@ -15,8 +16,8 @@ class CapitalExtractor:
     def download_capital_data(self):
         mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         saved_file = os.path.join(DRIVE_STORE, 'Capital.xlsx')
-        response = gdrive.search_capital_file()
-        self.file_io = gdrive.download_Docs_Editor_file(response['id'], mimeType=mimeType, saved_file=saved_file)
+        response = drive.search_capital_file()
+        self.file_io = drive.download_Docs_Editor_file(response['id'], mimeType=mimeType, saved_file=saved_file)
 
     def read(self):
         self.data = pd.read_excel(self.file_io.name)
