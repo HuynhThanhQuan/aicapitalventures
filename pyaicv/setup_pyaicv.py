@@ -66,5 +66,4 @@ def startup():
     # Token setting
     set_aicv_env_variable(setup_config, 'TOKEN_EXPIRY', mode_cfg['tokenSetting']['expiredTime'])
 
-
     log_all_AICV_env_vars()

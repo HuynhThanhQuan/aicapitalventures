@@ -13,30 +13,30 @@ import capital
 import customer as cust
 import report_analysis as rpa
 import gdrive
-from aicv_exception import *
+from .exception import *
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-DEFAULT_ANALYZER = None
+DEFAULT_ANALYSER = None
 
 
 
-class BaseAnalyzer:
+class BaseAnalyser:
     def __init__(self):
         pass
 
-    def analyze(self, table:pd.DataFrame):
+    def analyse(self, table:pd.DataFrame):
         pass
 
-class TCBSAnalyzer(BaseAnalyzer):
+class TCBSAnalyser(BaseAnalyser):
     def __init__(self):
         self.capital_extractor = capital.CapitalExtractor()
         self.customer_reports = {}
 
-    def analyze(self, table):
+    def analyse(self, table):
         if table is None:
             return None
         # correct table formats
@@ -44,9 +44,9 @@ class TCBSAnalyzer(BaseAnalyzer):
         table['Số hiệu lệnh'] = table['Số hiệu lệnh'].astype(str)
         # Group customers
         customer_data_groups = table.groupby('Khách hàng')
-        self.analyze_per_customer(customer_data_groups)
+        self.analyse_per_customer(customer_data_groups)
 
-    def analyze_per_customer(self, customer_data_groups):
+    def analyse_per_customer(self, customer_data_groups):
         for customer_name, customer_txn_data in customer_data_groups:
             logger.debug(f'Analyze {customer_name} assets')
             customer_capital = self.capital_extractor.get_deposit_data(customer_name)
@@ -61,16 +61,16 @@ class TCBSAnalyzer(BaseAnalyzer):
         gdrive.update_summary_report()
 
 
-def get_analyzer(security:str) -> BaseAnalyzer:
-    global DEFAULT_ANALYZER
-    logger.info(f'Set {security} Analyzer as default')
+def get_analyser(security:str) -> BaseAnalyser:
+    global DEFAULT_ANALYSER
+    logger.info(f'Set {security} Analyser as default')
     if security == 'TCBS':
-        DEFAULT_ANALYZER = TCBSAnalyzer()
-        return DEFAULT_ANALYZER
+        DEFAULT_ANALYSER = TCBSAnalyser()
+        return DEFAULT_ANALYSER
     else:
         raise SecurityCompanyNotImplementedError(f"Security {security} is not inplemented, please choose other security firm")
 
 
-def get_default_analyzer() -> BaseAnalyzer:
-    global DEFAULT_ANALYZER
-    return DEFAULT_ANALYZER
+def get_default_analyser() -> BaseAnalyser:
+    global DEFAULT_ANALYSER
+    return DEFAULT_ANALYSER

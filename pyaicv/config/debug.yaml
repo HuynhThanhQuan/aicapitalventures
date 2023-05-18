@@ -11,3 +11,5 @@ dir:
     - report
 tokenSetting:
   expiredTime: 10800
+dateFormat: '%Y-%m-%d'
+datetimeFormat: '%Y-%m-%d %H:%M:%S.%f'

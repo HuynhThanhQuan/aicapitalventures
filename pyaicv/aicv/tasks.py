@@ -23,7 +23,7 @@ This is the system piple of AI Capital Ventures, including 3 mains steps:
     3.3 Export
 """
 
-def run():
+def report_TCBS_customer_total_assets():
     """
     Run AI Capital Venture pipeline includes:
     1. Startup
@@ -33,8 +33,8 @@ def run():
     Input: mode: (None is production mode, 'debug' to run debug mode)
     """
     # 1. Verification
-    aicv_pipeline.startup()
+    pipeline.startup()
     # 2. Insight
-    aicv_pipeline.run_TCBS_analysis()
+    pipeline.run_TCBS_analysis()
     # 3. Visualization
-    aicv_pipeline.export_report()
+    pipeline.export_report()
