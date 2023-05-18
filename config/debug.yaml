@@ -10,4 +10,4 @@ dir:
     - key/gdrive/tmp
     - report
 tokenSetting:
-  expiredTime: 108000
+  expiredTime: 10800

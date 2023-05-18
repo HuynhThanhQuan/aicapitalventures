@@ -209,5 +209,5 @@ def delete_gdrive_file(file_id:str):
         logger.exception(F'An error occurred: {error}')
 
 
-def upload_summary_report(filepath: str):
+def update_summary_report(filepath: str):
     pass

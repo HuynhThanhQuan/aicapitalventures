@@ -46,7 +46,9 @@ class TCBSAnalyzer(BaseAnalyzer):
             self.customer_reports[customer_name] = cust_report
 
     def export_summary_report(self):
+        # Store local summary report
         rpa.export_summary_report(self.customer_reports)
+        gdrive.update_summary_report()
 
 
 def get_analyzer(security:str) -> BaseAnalyzer:

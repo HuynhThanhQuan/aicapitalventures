@@ -7,6 +7,9 @@ token.json
 # Specific files
 database/drive
 
+# VScode
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

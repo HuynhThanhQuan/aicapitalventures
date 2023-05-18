@@ -44,16 +44,19 @@ def export_summary_report(data: dict) -> pd.DataFrame:
         perf_report['customer_name'] = cust_name
         perf_report = perf_report.rename(columns={'TotalAssets': 'total_assets'})
         perf_report = perf_report[['customer_name', 'date', 'total_assets', 'diff', 'pct_change']]
-
+        # Export customer's performance report
+        perf_report_fp = os.path.join(LOCAL_REPORT_STORAGE, 'PerformanceReport_' + cust_name + '.xlsx')
+        perf_report.to_excel(perf_report_fp)
+        logger.debug(f'Exported Performance Report file of {cust_name} at {perf_report_fp}')
         if summary_df is None:
             summary_df = perf_report.copy()
         else:
             summary_df = pd.concat([summary_df, perf_report])
     # summary_df = summary_df.fillna(0)
     if summary_df is not None:
-        summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
+        # summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
         summary_df.to_excel(SUMMARY_REPORT)
         logger.debug(f'Exported Summary report file at {SUMMARY_REPORT}')
     else:
-        logger.error('Unable to export summary report, please check it')
+        logger.error('Unable to export summary Report, please check it')
     return summary_df
