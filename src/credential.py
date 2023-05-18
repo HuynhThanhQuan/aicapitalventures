@@ -167,7 +167,8 @@ class TokenManagement:
         for id in removed_tokenids:
             logger.debug(f'Prune token {id}')
             f = os.path.join(self.cache_store, id + '.json')
-            os.remove(f)
+            if os.path.exists(f):
+                os.remove(f)
             self.token_metadata.remove_token(id)
         
     def __request_new_token(self, scopes):

@@ -1,5 +1,5 @@
 version: 0.0.1
 versionControl: True
 envVarPrefix: 'AICV'
-mode: debug
+mode: prod
 configDir: "/Users/quan/work/macroeconomics/config/"
