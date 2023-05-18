@@ -1,4 +1,4 @@
-import aicv_pipeline
+import pipeline
 
 """
 This is the system piple of AI Capital Ventures, including 3 mains steps:
