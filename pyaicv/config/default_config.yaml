@@ -1,14 +1,14 @@
-desc: "PROD MODE"
+desc: "DEFAULT PARAMS CONFIGURATION"
 logLevel: 'DEBUG'
 dir:
   installedFolder: 
     - database
     - database/drive
     - key
-    - key/gdrive
-    - key/gdrive/tmp
+    - key/drive
+    - key/drive/tmp
     - report
 tokenSetting:
-  expiredTime: 300
+  expiredTime: 3600
 dateFormat: '%Y-%m-%d'
 datetimeFormat: '%Y-%m-%d %H:%M:%S.%f'

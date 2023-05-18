@@ -1,14 +1,3 @@
 desc: "DEBUG MODE"
-logLevel: 'DEBUG'
-dir:
-  installedFolder: 
-    - database
-    - database/drive
-    - key
-    - key/gdrive
-    - key/gdrive/tmp
-    - report
 tokenSetting:
   expiredTime: 10800
-dateFormat: '%Y-%m-%d'
-datetimeFormat: '%Y-%m-%d %H:%M:%S.%f'

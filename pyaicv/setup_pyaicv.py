@@ -3,9 +3,14 @@ import argparse
 import yaml
 import logging
 
-# Setup Logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s - %(levelname)-7s - %(name)-15s - %(message)s')
+
+logger = None
+
+
+def setup_logging(setup_config):
+    global logger
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(format=setup_config['loggingFormat'])
 
 
 def set_aicv_env_variable(setup_config, key, value):
@@ -14,44 +19,56 @@ def set_aicv_env_variable(setup_config, key, value):
     os.environ[varkey] = str(value)
 
 
-def log_all_AICV_env_vars():
+def inspect_AICV_env_vars():
     # Log all AICV env vars
-    for k, v in os.environ.items():
+    for k, v in os.environ.copy().items():
         if 'AICV' in k:
             logger.debug(f'{k:<25} {v}')
 
 
-def startup():
-    parser = argparse.ArgumentParser(
-                        prog='AI Capital Ventures config',
-                        description='Commands to operate all activities of AI Capital Ventures ',
-                        epilog='Please DM hthquan28@gmail.com to help')
-    parser.add_argument('config', help='Config file to setup AI Capital Ventures app',type=str)
-    args = parser.parse_args()
-
+def load_setup_config():
     # Read setup config 
-    with open(args.config, 'r') as file:
+    setup_config = None
+    with open('./config/setup.yaml', 'r') as file:
         setup_config = yaml.safe_load(file)
-    app_version = setup_config['version']
-    version_control = setup_config['versionControl']
-    
-    # Load mode-params configure
-    with open(os.path.join(setup_config['configDir'], setup_config['mode'] + '.yaml'), 'r') as file:
-        mode_cfg = yaml.safe_load(file)
-    logger.setLevel(mode_cfg['logLevel'])
-    logger.info('Setup config %s' % setup_config)
-    logger.debug('Mode params config %s' % mode_cfg)
+    assert setup_config, "Null setup config, cannot start initial-setup"
+    return setup_config
 
+
+def load_mode_configure(setup_config):
+    default_cfg = {}
+    # Load default params config
+    with open('./config/default_config.yaml', 'r') as file:
+        default_cfg = yaml.safe_load(file)
+    # Load mode-params configure
+    with open(os.path.join('./config/', setup_config['mode'] + '.yaml'), 'r') as file:
+        mode_cfg = yaml.safe_load(file)
+    # Update default config with selected-mode config
+    default_cfg.update(mode_cfg)
+    
+    logger.setLevel(default_cfg['logLevel'])
+    logger.info('Setup config %s' % setup_config)
+    logger.info('Mode params config %s' % default_cfg)
+    logger.info('%s' % default_cfg['desc'])
+    return default_cfg
+
+
+def setup_project(setup_config, mode_cfg):
+    app_version = setup_config['version']
+    version_control = setup_config['project']['versionControl']
     # Installed folders with version control setting
-    root = mode_cfg['dir']['root']
+    root = setup_config['project']['root']
+    mode = setup_config['mode']
     if version_control:
-        parent_folder = os.path.dirname(root)
         basename = os.path.basename(root)
-        root = os.path.join(parent_folder, app_version, basename)
+        root = os.path.join(root, app_version, mode)
+    else:
+        root = os.path.join(root, mode)
+
+    os.environ['AICV'] = root
 
     # Make dir and set environment variables
     insFolders = mode_cfg['dir']['installedFolder']
-    os.environ['AICV'] = root
     if not os.path.exists(root):
         os.makedirs(root)
     for f in insFolders:
@@ -62,11 +79,20 @@ def startup():
         set_aicv_env_variable(setup_config, key, fp)
 
 
+def setup_project_settings(setup_config, mode_cfg):
     # Set os environment for some setting configs
     # Token setting
     set_aicv_env_variable(setup_config, 'TOKEN_EXPIRY', mode_cfg['tokenSetting']['expiredTime'])
 
-    log_all_AICV_env_vars()
+
+def startup():
+    setup_config = load_setup_config()
+    setup_logging(setup_config)
+    mode_cfg = load_mode_configure(setup_config)
+    setup_project(setup_config, mode_cfg)
+    setup_project_settings(setup_config, mode_cfg)
+    inspect_AICV_env_vars()
 
 
-startup()
+if __name__ == '__main__':
+    startup()

@@ -1,5 +1,7 @@
 version: 0.0.1
-versionControl: True
 envVarPrefix: 'AICV'
 mode: debug
-playgroundRoot: '/Users/quan/playground/aicv_debug'
+project:
+  versionControl: True
+  root: '/Users/quan/playground/pyaicv'
+loggingFormat: '%(asctime)s - %(levelname)-7s - %(name)-15s - %(message)s'

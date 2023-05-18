@@ -1,14 +1,4 @@
 desc: "PROD MODE"
 logLevel: 'INFO'
-dir:
-  installedFolder: 
-    - database
-    - database/drive
-    - key
-    - key/gdrive
-    - key/gdrive/tmp
-    - report
 tokenSetting:
   expiredTime: 300
-dateFormat: '%Y-%m-%d'
-datetimeFormat: '%Y-%m-%d %H:%M:%S.%f'
