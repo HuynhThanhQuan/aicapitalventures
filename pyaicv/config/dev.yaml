@@ -1,0 +1,6 @@
+desc: "DEVELOPMENT"
+tokenSetting:
+  expiredTime: 10800
+mode:
+  debug:
+  release:

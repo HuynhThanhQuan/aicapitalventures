@@ -1,7 +1,7 @@
 #
 # Please refer this OAuth 2.0 Scopes for Google APIs: https://developers.google.com/identity/protocols/oauth2/scopes
 # Default token will be READ-ONLY credentials to ensure the compromised actions that could affect the data
-# Token of EDIT credentials will not be saved, instead using directly and release after using it
+# Token of EDIT credentials will be saved for a period of time, range from 300seconds to 10800seconds
 #
 #
 
@@ -15,7 +15,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from .credential_exception import *
+from .exception import *
 
 
 logger = logging.getLogger(__name__)
@@ -237,6 +237,9 @@ token_management = TokenManagement(cache_duration=int(os.environ['AICV_TOKEN_EXP
 def get_read_only_credentials() -> Credentials:
     return token_management.get_readonly_credentials()
 
+
+def get_default_credentials() -> Credentials:
+    return get_read_only_credentials()
 
 def get_edit_credentials() -> Credentials:
     return token_management.get_edit_credentials()

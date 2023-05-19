@@ -1,0 +1,22 @@
+desc: DEFAULT PARAMS CONFIGURATION
+logLevel: DEBUG
+mode:
+  debug:
+  release:
+remote:
+  name: google
+  metadata:
+    root:
+      folderId: 15OcuqE_QvUhO_MOhzeaZKSGprRlwODP2
+      folderName: AICapitalVentures_stg
+dir:
+  installedFolder: 
+    - database
+    - database/local
+    - database/local/report
+    - key
+    - key/tmp
+tokenSetting:
+  expiredTime: 3600
+dateFormat: '%Y-%m-%d'
+datetimeFormat: '%Y-%m-%d %H:%M:%S.%f'

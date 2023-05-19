@@ -1,12 +1,12 @@
-version: 0.0.1
+version: 0.0.3
+environment: stg
 mode: debug
 project:
   versionControl: True
-  root: '/Users/quan/playground/pyaicv'
-envVarPrefix: 'AICV'
+  root: /Users/quan/playground/pyaicv
+envVarPrefix: AICV
 loggingFormat: '%(asctime)s - %(levelname)-7s - %(name)-20s : %(message)s'
 repo:
-  url: 'git@github.com:HuynhThanhQuan/aicapitalventures.git'
-  author: 'Huynh Thanh Quan'
-  email: 'hthquan28@gmail.com'
-  help': 'Please create ticket or sent me email for any issue'
+  url: git@github.com:HuynhThanhQuan/aicapitalventures.git
+  author: Huynh Thanh Quan
+  email: hthquan28@gmail.com

@@ -106,7 +106,6 @@ class TCBSOperationMangement:
         return reviewed_verfied_records_fp
 
 
-
 TCBS_OPS = TCBSOperationMangement()
 
 

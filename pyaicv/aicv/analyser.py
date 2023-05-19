@@ -12,6 +12,7 @@ import pandas as pd
 from pyaicv.security import factory
 from .exception import *
 from . import report_analysis as rpa
+from . import drive
 
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,6 @@ class BaseAnalyser:
 
 class TCBSAnalyser(BaseAnalyser):
     def __init__(self):
-        # self.customer_capital = factory.get_active_security().get_capital_management()
         self.customer_reports = {}
 
     def run_analysis_full_database(self):
@@ -55,7 +55,9 @@ class TCBSAnalyser(BaseAnalyser):
 
     def export_summary_report(self):
         # Store local summary report
-        rpa.export_summary_report(self.customer_reports)
+        summary_df = rpa.export_summary_report(self.customer_reports)
+        if summary_df is not None:
+            drive.update_values()
 
 
 def get_default_analyser() -> BaseAnalyser:

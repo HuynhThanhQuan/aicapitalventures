@@ -16,9 +16,6 @@ def export_total_asset_value_report(data: pd.DataFrame) -> dict:
     date_rp = data.copy()
     date_rp = data.groupby('date')['TotalAssets'].last().dropna()
     week_rp = date_rp.copy().reset_index()
-    # week_rp['date'] = pd.to_datetime(week_rp['date']) - pd.to_timedelta(7, unit='d')
-    # #calculate sum of values, grouped by week
-    # week_rp = week_rp.groupby([pd.Grouper(key='date', freq='W')])['TotalAssets'].last()
     week_rp['week'] = week_rp['date'].dt.isocalendar().week
     week_rp = week_rp.groupby('week')['TotalAssets'].last()
     month_rp = date_rp.copy().reset_index()

@@ -3,7 +3,7 @@ import argparse
 import yaml
 import logging
 import sys
-
+import project
 
 logger = None
 
@@ -34,19 +34,20 @@ def load_setup_config():
     with open('./config/setup.yaml', 'r') as file:
         setup_config = yaml.safe_load(file)
     assert setup_config, "Null setup config, cannot start initial-setup"
+    assert len(setup_config) > 0, "Setup Config invalid"
     return setup_config
 
 
-def load_mode_configure(setup_config):
+def load_environment_configure(setup_config):
     default_cfg = {}
     # Load default params config
-    with open('./config/default_config.yaml', 'r') as file:
+    with open('./config/default_env.yaml', 'r') as file:
         default_cfg = yaml.safe_load(file)
-    # Load mode-params configure
-    with open(os.path.join('./config/', setup_config['mode'] + '.yaml'), 'r') as file:
-        mode_cfg = yaml.safe_load(file)
-    # Update default config with selected-mode config
-    default_cfg.update(mode_cfg)
+    # Load env-params configure
+    with open(os.path.join('./config/', setup_config['environment'] + '.yaml'), 'r') as file:
+        env_cfg = yaml.safe_load(file)
+    # Update default config with selected-env config
+    default_cfg.update(env_cfg)
     
     logger.setLevel(default_cfg['logLevel'])
     logger.info('==============================================================================================')
@@ -63,25 +64,24 @@ def load_mode_configure(setup_config):
     return default_cfg
 
 
-def setup_project(setup_config, mode_cfg):
+def setup_project(setup_config, env_cfg):
     # Add PyAICV module into sys.path
     sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-    
+
+    # Version & Root folder    
     app_version = setup_config['version']
     version_control = setup_config['project']['versionControl']
-    # Installed folders with version control setting
     root = setup_config['project']['root']
-    mode = setup_config['mode']
+    env = setup_config['environment']
     if version_control:
         basename = os.path.basename(root)
-        root = os.path.join(root, app_version, mode)
+        root = os.path.join(root, app_version, env)
     else:
-        root = os.path.join(root, mode)
-
+        root = os.path.join(root, env)
     os.environ['AICV'] = root
 
-    # Make dir and set environment variables
-    insFolders = mode_cfg['dir']['installedFolder']
+    # Directories & env vars
+    insFolders = env_cfg['dir']['installedFolder']
     if not os.path.exists(root):
         os.makedirs(root)
     for f in insFolders:
@@ -92,18 +92,22 @@ def setup_project(setup_config, mode_cfg):
         set_aicv_env_variable(setup_config, key, fp)
 
 
-def setup_project_settings(setup_config, mode_cfg):
+def setup_project_settings(setup_config, env_cfg):
     # Set os environment for some setting configs
     # Token setting
-    set_aicv_env_variable(setup_config, 'TOKEN_EXPIRY', mode_cfg['tokenSetting']['expiredTime'])
+    set_aicv_env_variable(setup_config, 'TOKEN_EXPIRY', env_cfg['tokenSetting']['expiredTime'])
+
+    # Remote Info
+    set_aicv_env_variable(setup_config, 'REMOTE',env_cfg['remote']['name'])
+    set_aicv_env_variable(setup_config, 'REMOTE_METADATA', env_cfg['remote']['metadata'])
 
 
 def startup():
     setup_config = load_setup_config()
     setup_logging(setup_config)
-    mode_cfg = load_mode_configure(setup_config)
-    setup_project(setup_config, mode_cfg)
-    setup_project_settings(setup_config, mode_cfg)
+    env_cfg = load_environment_configure(setup_config)
+    setup_project(setup_config, env_cfg)
+    setup_project_settings(setup_config, env_cfg)
     inspect_AICV_env_vars()
 
 
