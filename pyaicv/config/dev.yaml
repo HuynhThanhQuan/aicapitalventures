@@ -1,6 +1,21 @@
-desc: "DEVELOPMENT"
+desc: DEVELOPMENT
 tokenSetting:
   expiredTime: 10800
+remote:
+  - name: google_api
+    metadata:
+      usedServiceEndpoint:
+        - drive
+      serviceEndpoint:
+        - endpoint: drive
+          metadata:
+            root:
+              folderId: 15OcuqE_QvUhO_MOhzeaZKSGprRlwODP2
+      credentialSetting:
+        tokenExpiredTime: 3600
+security:
+  - name: TCBS
+    metadata:
 mode:
   debug:
   release:

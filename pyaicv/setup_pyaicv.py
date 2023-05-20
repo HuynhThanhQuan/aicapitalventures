@@ -3,7 +3,7 @@ import argparse
 import yaml
 import logging
 import sys
-import project
+from project import project_singleton as proj
 
 logger = None
 
@@ -65,41 +65,11 @@ def load_environment_configure(setup_config):
 
 
 def setup_project(setup_config, env_cfg):
-    # Add PyAICV module into sys.path
-    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-    # Version & Root folder    
-    app_version = setup_config['version']
-    version_control = setup_config['project']['versionControl']
-    root = setup_config['project']['root']
-    env = setup_config['environment']
-    if version_control:
-        basename = os.path.basename(root)
-        root = os.path.join(root, app_version, env)
-    else:
-        root = os.path.join(root, env)
-    os.environ['AICV'] = root
-
-    # Directories & env vars
-    insFolders = env_cfg['dir']['installedFolder']
-    if not os.path.exists(root):
-        os.makedirs(root)
-    for f in insFolders:
-        key = f.upper().replace('/','_')
-        fp = os.path.join(root, f)
-        if not os.path.exists(fp):
-            os.makedirs(fp)
-        set_aicv_env_variable(setup_config, key, fp)
-
-
-def setup_project_settings(setup_config, env_cfg):
-    # Set os environment for some setting configs
-    # Token setting
-    set_aicv_env_variable(setup_config, 'TOKEN_EXPIRY', env_cfg['tokenSetting']['expiredTime'])
-
-    # Remote Info
-    set_aicv_env_variable(setup_config, 'REMOTE',env_cfg['remote']['name'])
-    set_aicv_env_variable(setup_config, 'REMOTE_METADATA', env_cfg['remote']['metadata'])
+    proj.set_config(
+        config={
+            'setup_config': setup_config,
+            'env_cfg': env_cfg})
+    proj.init()
 
 
 def startup():
@@ -107,7 +77,6 @@ def startup():
     setup_logging(setup_config)
     env_cfg = load_environment_configure(setup_config)
     setup_project(setup_config, env_cfg)
-    setup_project_settings(setup_config, env_cfg)
     inspect_AICV_env_vars()
 
 

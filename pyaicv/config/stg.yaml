@@ -1,4 +1,4 @@
-desc: "STAGING"
-logLevel: 'INFO'
+desc: STAGING
+logLevel: INFO
 tokenSetting:
   expiredTime: 300

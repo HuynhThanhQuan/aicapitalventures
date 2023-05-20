@@ -15,7 +15,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from .exception import *
+from google_api.credential.exception import *
 
 
 logger = logging.getLogger(__name__)
@@ -27,8 +27,8 @@ SCOPE_READONLY  = 'https://www.googleapis.com/auth/drive.readonly'
 SCOPE_METADATA  = 'https://www.googleapis.com/auth/drive.metadata'
 
 
-GDRIVE = os.environ['AICV_KEY_DRIVE']
-TOKEN_FILE = os.path.join(GDRIVE, 'token.json')
+# GDRIVE = os.environ['AICV_KEY_DRIVE']
+# TOKEN_FILE = os.path.join(GDRIVE, 'token.json')
 
 
 class TokenMetadata:
@@ -129,8 +129,8 @@ class TokenMetadata:
 class TokenManagement:
     def __init__(self, cache_duration=300):
         self.default_credentials = None
-        self.init_setup()
-        self.init_token_cache(cache_duration=cache_duration)
+        # self.init_setup()
+        # self.init_token_cache(cache_duration=cache_duration)
 
     def init_setup(self):
         self.cred_file = os.path.join(GDRIVE, 'client_secret.json')
@@ -231,7 +231,7 @@ class TokenManagement:
         return edit_creds
 
 
-token_management = TokenManagement(cache_duration=int(os.environ['AICV_TOKEN_EXPIRY']))
+token_management = TokenManagement()
 
 
 def get_read_only_credentials() -> Credentials:

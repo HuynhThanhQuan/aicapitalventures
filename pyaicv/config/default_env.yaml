@@ -4,11 +4,9 @@ mode:
   debug:
   release:
 remote:
-  name: google
-  metadata:
-    root:
-      folderId: 15OcuqE_QvUhO_MOhzeaZKSGprRlwODP2
-      folderName: AICapitalVentures_stg
+  - name:
+security:
+  - name:
 dir:
   installedFolder: 
     - database
@@ -16,7 +14,5 @@ dir:
     - database/local/report
     - key
     - key/tmp
-tokenSetting:
-  expiredTime: 3600
 dateFormat: '%Y-%m-%d'
 datetimeFormat: '%Y-%m-%d %H:%M:%S.%f'

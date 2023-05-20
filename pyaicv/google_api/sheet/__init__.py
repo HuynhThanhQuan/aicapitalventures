@@ -1,8 +1,7 @@
 import logging
 
-
-from pyaicv.google import credential
-from . import exception
+from google_api import credential
+from google_api.sheet.exception import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

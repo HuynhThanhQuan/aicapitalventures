@@ -1,4 +1,4 @@
-desc: "PRODUCTION"
-logLevel: 'INFO'
+desc: PRODUCTION
+logLevel: INFO
 tokenSetting:
   expiredTime: 300

@@ -1,4 +1,4 @@
-desc: "TESTING"
-logLevel: 'DEBUG'
+desc: TESTING
+logLevel: DEBUG
 tokenSetting:
   expiredTime: 300

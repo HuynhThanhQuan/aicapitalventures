@@ -1,10 +1,10 @@
 version: 0.0.3
-environment: stg
+environment: dev
 mode: debug
 project:
   versionControl: True
   root: /Users/quan/playground/pyaicv
-envVarPrefix: AICV
+  override: False
 loggingFormat: '%(asctime)s - %(levelname)-7s - %(name)-20s : %(message)s'
 repo:
   url: git@github.com:HuynhThanhQuan/aicapitalventures.git

@@ -12,16 +12,16 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
 
-from .exception import *
-from pyaicv.google import credential
+from google_api.drive.exception import *
+from google_api import credential
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-DRIVE_LOCAL_STORE = os.environ['AICV_DATABASE_DRIVE']
-DRIVE_REMOTE_ID_STORE = None
+# DRIVE_LOCAL_STORE = os.environ['AICV_DATABASE_DRIVE']
+# DRIVE_REMOTE_ID_STORE = None
 
 
 def fetch_remote_AICV_folderID():
@@ -53,7 +53,7 @@ def fetch_remote_AICV_folderID():
         logger.debug(f'AI Capital Ventures Drive ID: {DRIVE_REMOTE_ID_STORE}')
 
 
-fetch_remote_AICV_folderID()
+# fetch_remote_AICV_folderID()
 
 
 
