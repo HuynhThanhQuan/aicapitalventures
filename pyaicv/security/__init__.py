@@ -1,6 +1,11 @@
 import os
 import sys
 import importlib
+import logging
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class SecurityFirmNotSelected(Exception):
@@ -37,9 +42,3 @@ class SecurityFirmFactory(dict):
 
 
 factory = SecurityFirmFactory()
-
-
-if __name__ == "__main__":
-    print(get_current_dir())
-    factory.set('TCBS')
-    print(factory.get('TCBS'))

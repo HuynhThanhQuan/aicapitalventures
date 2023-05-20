@@ -14,7 +14,7 @@ remote:
       credentialSetting:
         tokenExpiredTime: 3600
 security:
-  - name: TCBS
+  - name: tcbs
     metadata:
 mode:
   debug:

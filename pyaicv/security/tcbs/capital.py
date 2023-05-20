@@ -3,15 +3,14 @@ from pathlib import Path
 from datetime import datetime
 import pandas as pd
 
-from . import drive
 
-
-DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
+# DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
 
 class CustomerCapital:
     def __init__(self):
-        self.download_capital_data()
-        self.read()
+        pass
+        # self.download_capital_data()
+        # self.read()
 
     def download_capital_data(self):
         mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

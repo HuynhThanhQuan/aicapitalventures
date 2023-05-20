@@ -3,7 +3,7 @@ import argparse
 import yaml
 import logging
 import sys
-from project import project_singleton as proj
+
 
 logger = None
 
@@ -22,10 +22,12 @@ def set_aicv_env_variable(setup_config, key, value):
 
 def inspect_AICV_env_vars():
     # Log all AICV env vars
+    logger.debug('*******')
     logger.debug('PYAICV Environment Variables: ')
     for k, v in os.environ.copy().items():
         if 'AICV' in k:
             logger.debug(f'\t{k:<25} {v}')
+    logger.debug('*******')
 
 
 def load_setup_config():
@@ -65,6 +67,7 @@ def load_environment_configure(setup_config):
 
 
 def setup_project(setup_config, env_cfg):
+    from project import project_instance as proj
     proj.set_config(
         config={
             'setup_config': setup_config,

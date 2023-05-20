@@ -7,7 +7,6 @@ import re
 from datetime import datetime
 
 from .tcbs_exception import *
-from . import drive
 from . import capital
 from . import customer as cust
 from . import transaction
@@ -17,10 +16,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-LOCAL_DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
-VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Verified_records.xlsx')
-DRIVE_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Drive_Verified_records.xlsx')
-REVIEWED_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Review_Verified_records.xlsx')
+# LOCAL_DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
+# VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Verified_records.xlsx')
+# DRIVE_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Drive_Verified_records.xlsx')
+# REVIEWED_VERIFIED_RECORDS = os.path.join(LOCAL_DRIVE_STORE, 'Review_Verified_records.xlsx')
 
 
 class TCBSOperationMangement:

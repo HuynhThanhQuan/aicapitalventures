@@ -14,9 +14,10 @@ def set_aicv_env_variable(key, value):
     os.environ[varkey] = str(value)
 
 
-class ProjectSingleton:
+class ProjectInstance:
     def __init__(self):
-        pass
+        logger.debug('--------------------------------------------------------------------------------------------------')
+        logger.debug('Init project AICV')
 
     def set_config(self, config):
         self.setup_config = config['setup_config']
@@ -27,6 +28,11 @@ class ProjectSingleton:
         self.__setup_root_folder()
         self.__setup_installed_folders()
         self.__setup_remote_parties()
+        self.__setup_security_parties()
+        self.post_setup()
+
+    def post_setup(self):
+        logger.debug('--------------------------------------------------------------------------------------------------')
 
     def __init_project_module(self):
         self.pyaicv_fp = os.path.dirname(__file__)
@@ -76,11 +82,25 @@ class ProjectSingleton:
         for pt in remotePts:
             pt_name = pt['name']
             if os.path.exists(os.path.join(self.pyaicv_fp, pt_name)):
-                logger.debug(f'Searching module {pt_name}')
+                logger.debug(f'Importing remote module: {pt_name}')
                 self.installedRemoteParty[pt_name] = importlib.import_module(pt_name)
                 set_aicv_env_variable(key=pt_name.upper(), value=pt)
             else:
                 logger.warn(f'{pt_name} remote module is not found. Safely ignore this module')
 
+    def __setup_security_parties(self):
+        # Add Security submodules into sys.path
+        sys.path.append(os.path.join(self.pyaicv_fp, 'security'))
+        self.installedSecurityParty = {}
+        secPts = self.env_cfg['security']
+        for sec in secPts:
+            sec_name = sec['name']
+            if os.path.exists(os.path.join(self.pyaicv_fp, 'security', sec_name)):
+                logger.debug(f'Importing security module: {sec_name.upper()}')
+                self.installedSecurityParty[sec_name] = importlib.import_module(sec_name)
+                set_aicv_env_variable(key=sec_name.upper(), value=sec)
+            else:
+                logger.warn(f'{sec_name} security module is not found. Safely ignore this module')
 
-project_singleton = ProjectSingleton()
+
+project_instance = ProjectInstance()

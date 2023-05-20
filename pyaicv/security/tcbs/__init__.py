@@ -12,8 +12,6 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-logger.info(f"{NAME} module is set")
-
 
 from . import ops
 
