@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-LOCAL_REPORT_STORAGE = os.environ['AICV_REPORT']
-SUMMARY_REPORT = os.path.join(LOCAL_REPORT_STORAGE, 'Summary.xlsx')
+# LOCAL_REPORT_STORAGE = os.environ['AICV_REPORT']
+# SUMMARY_REPORT = os.path.join(LOCAL_REPORT_STORAGE, 'Summary.xlsx')
 
 
 def export_total_asset_value_report(data: pd.DataFrame) -> dict:

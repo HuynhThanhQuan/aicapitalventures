@@ -12,7 +12,7 @@ import pandas as pd
 from pyaicv.security import factory
 from .exception import *
 from . import report_analysis as rpa
-from . import drive
+# from . import drive
 
 
 logger = logging.getLogger(__name__)

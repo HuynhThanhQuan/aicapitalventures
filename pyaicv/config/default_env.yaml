@@ -13,6 +13,5 @@ dir:
     - database/local
     - database/local/report
     - key
-    - key/tmp
 dateFormat: '%Y-%m-%d'
 datetimeFormat: '%Y-%m-%d %H:%M:%S.%f'

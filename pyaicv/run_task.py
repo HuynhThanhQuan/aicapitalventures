@@ -1,8 +1,9 @@
 """
 """
+import argparse
+
 import setup_pyaicv
 from aicv import tasks
-import argparse
 
 
 if __name__ == '__main__':
@@ -11,7 +12,12 @@ if __name__ == '__main__':
                         description='Commands to operate all activities of AI Capital Ventures ',
                         epilog='Please DM hthquan28@gmail.com to help')
     parser.add_argument('task', help='Config file to setup AI Capital Ventures app',type=int)
+    parser.add_argument('--customer_name', help='Config file to setup AI Capital Ventures app',type=int)
     args = parser.parse_args()
     
     if args.task == 0:
-        tasks.report_TCBS_customer_total_assets()
+        tasks.upload_TCBS_reviewed_data()
+    elif args.task == 1:
+        tasks.get_TCBS_summary_report()
+    elif args.task == 2:
+        tasks.get_TCBS_customer_report(args.customer_name)

@@ -26,7 +26,12 @@ def inspect_AICV_env_vars():
     logger.debug('PYAICV Environment Variables: ')
     for k, v in os.environ.copy().items():
         if 'AICV' in k:
-            logger.debug(f'\t{k:<25} {v}')
+            try:
+                v_str = str(v)
+                v_str = v_str[:71] if len(v_str) <= 71 else v_str[:71] + '...'
+            except:
+                v_str = v
+            logger.debug(f'\t{k:<25} {v_str}')
     logger.debug('*******')
 
 

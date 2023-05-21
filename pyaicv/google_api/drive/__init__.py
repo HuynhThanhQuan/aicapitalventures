@@ -12,8 +12,8 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
 
-from google_api.drive.exception import *
-from google_api import credential
+from pyaicv.google_api.drive.exception import *
+from pyaicv.google_api import credential
 
 
 logger = logging.getLogger(__name__)
@@ -24,33 +24,33 @@ logger.setLevel(logging.DEBUG)
 # DRIVE_REMOTE_ID_STORE = None
 
 
-def fetch_remote_AICV_folderID():
-    global DRIVE_REMOTE_ID_STORE
-    """Search file in drive location"""
-    try:
-        service = build('drive', 'v3', credentials=credential.get_read_only_credentials())
-        files = []
-        page_token = None
-        while True:
-            response = service.files().list(q="name contains 'AICapitalVentures' and mimeType='application/vnd.google-apps.folder'",
-                                            spaces='drive',
-                                            fields='nextPageToken, '
-                                                   'files(id, name, mimeType)',
-                                            pageToken=page_token).execute()
-            files.extend(response.get('files', []))
-            page_token = response.get('nextPageToken', None)
-            if page_token is None:
-                break
-    except HttpError as error:
-        logger.exception(F'An error occurred: {error}')
-        files = None
-    if len(files) == 0:
-        raise AICapitalVenturesRemoteNotFound("Unable to fetch AI Capital Ventures on Drive store")
-    elif len(files) > 1:
-        raise AICapitalVenturesRemoteDuplicated("Found more than 1 AI Capital Ventures repository")
-    else:
-        DRIVE_REMOTE_ID_STORE = files[0]['id']
-        logger.debug(f'AI Capital Ventures Drive ID: {DRIVE_REMOTE_ID_STORE}')
+# def fetch_remote_AICV_folderID():
+#     global DRIVE_REMOTE_ID_STORE
+#     """Search file in drive location"""
+#     try:
+#         service = build('drive', 'v3', credentials=credential.get_read_only_credentials())
+#         files = []
+#         page_token = None
+#         while True:
+#             response = service.files().list(q="name contains 'AICapitalVentures' and mimeType='application/vnd.google-apps.folder'",
+#                                             spaces='drive',
+#                                             fields='nextPageToken, '
+#                                                    'files(id, name, mimeType)',
+#                                             pageToken=page_token).execute()
+#             files.extend(response.get('files', []))
+#             page_token = response.get('nextPageToken', None)
+#             if page_token is None:
+#                 break
+#     except HttpError as error:
+#         logger.exception(F'An error occurred: {error}')
+#         files = None
+#     if len(files) == 0:
+#         raise AICapitalVenturesRemoteNotFound("Unable to fetch AI Capital Ventures on Drive store")
+#     elif len(files) > 1:
+#         raise AICapitalVenturesRemoteDuplicated("Found more than 1 AI Capital Ventures repository")
+#     else:
+#         DRIVE_REMOTE_ID_STORE = files[0]['id']
+#         logger.debug(f'AI Capital Ventures Drive ID: {DRIVE_REMOTE_ID_STORE}')
 
 
 # fetch_remote_AICV_folderID()
@@ -124,11 +124,11 @@ def download_DocEditor_file(file_id:str, mimeType:str, saved_file:str):
 
 
 
-def upload_DocEditor_file(filepath:str, metadata:dict, mimeType:str, resumable=True, fields='id'):
+def upload_DocEditor_file(filepath:str, mimeType:str, metadata:dict, resumable=True, fields='id'):
     try:
         service = build('drive', 'v3', credentials=credential.get_edit_credentials())
         media = MediaFileUpload(filepath, mimetype=mimeType,resumable=resumable)
-        file = service.files().create(body=file_metadata, media_body=media, fields=fields).execute()
+        file = service.files().create(body=metadata, media_body=media, fields=fields).execute()
         logger.info(F'File with ID "{file.get("id")}" has been uploaded.')
     except HttpError as error:
         logger.exception(F'An error occurred: {error}')
@@ -139,26 +139,18 @@ def upload_DocEditor_file(filepath:str, metadata:dict, mimeType:str, resumable=T
 """
 """
 
-def download_verified_record(id, saved_file):
-    file_info = download_Docs_Editor_file(id, mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', saved_file=saved_file)
-    return file_info
+# def download_verified_record(id, saved_file):
+#     file_info = download_Docs_Editor_file(id, mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', saved_file=saved_file)
+#     return file_info
 
 
-def search_transaction_history_files() -> list[dict]:
-    query_statement = "name contains 'Lịch sử giao dịch cổ phiếu_Huỳnh Thanh Quan' and mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
-    files = search(query_statement)
-    if len(files) > 0:
-        logger.debug(f'Searched "Lịch sử giao dịch cổ phiếu_Huỳnh Thanh Quan" with IDs {[f["id"] for f in files]} in Drive')
-    return files
-
-
-def search_verified_records() -> list[dict]:
-    query_statement = f"name = 'Verified_records.xlsx' and parents in '{DRIVE_REMOTE_ID_STORE}' and trashed=false"
-    fields = 'nextPageToken, files(id, name, mimeType, parents, createdTime)'
-    files = search(query_statement, fields=fields)
-    if len(files) > 0:
-        logger.debug(f'Searched "Verified_records.xlsx" with IDs {[f["id"] for f in files]} in Drive')
-    return files
+# def search_verified_records() -> list[dict]:
+#     query_statement = f"name = 'Verified_records.xlsx' and parents in '{DRIVE_REMOTE_ID_STORE}' and trashed=false"
+#     fields = 'nextPageToken, files(id, name, mimeType, parents, createdTime)'
+#     files = search(query_statement, fields=fields)
+#     if len(files) > 0:
+#         logger.debug(f'Searched "Verified_records.xlsx" with IDs {[f["id"] for f in files]} in Drive')
+#     return files
 
 
 def search_capital_file() -> list[dict]:
@@ -170,21 +162,5 @@ def search_capital_file() -> list[dict]:
     return files[0]
 
 
-def upload_verified_records_drive(filepath:str):
-    file_metadata = {
-        'name': 'Verified_records.xlsx',
-        'parents': [DRIVE_REMOTE_ID_STORE],
-        'mimeType': 'application/vnd.google-apps.spreadsheet'
-    }
-    mimetype='application/vnd.google-apps.spreadsheet'
-    return upload_DocEditor_file(filepath, metadata=metadata, mimeType=mimeType)
 
 
-def download_TCBS_transaction_history() -> list[io.FileIO]:
-    logger.info('Download all TCB transaction history')
-    files = search_transaction_history_files()
-    files_info = []
-    for i, f in enumerate(files):
-        txn_file = os.path.join(DRIVE_LOCAL_STORE, f'TCBS_transaction_history_{i}.xlsx')
-        files_info.append(download_blob_file(f['id'], txn_file))
-    return files_info

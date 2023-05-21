@@ -41,7 +41,6 @@ class ProjectInstance:
         # Add PyAICV submodules into sys.path
         sys.path.append(self.pyaicv_fp)
 
-
     def __setup_root_folder(self):
         # Versioning & Root folder    
         app_version = self.setup_config['version']
@@ -79,28 +78,32 @@ class ProjectInstance:
     def __setup_remote_parties(self):
         self.installedRemoteParty = {}
         remotePts = self.env_cfg['remote']
+        valid_remote_pts = []
         for pt in remotePts:
             pt_name = pt['name']
             if os.path.exists(os.path.join(self.pyaicv_fp, pt_name)):
                 logger.debug(f'Importing remote module: {pt_name}')
                 self.installedRemoteParty[pt_name] = importlib.import_module(pt_name)
-                set_aicv_env_variable(key=pt_name.upper(), value=pt)
+                valid_remote_pts.append(pt)
             else:
                 logger.warn(f'{pt_name} remote module is not found. Safely ignore this module')
+        set_aicv_env_variable(key='REMOTE', value=valid_remote_pts)
 
     def __setup_security_parties(self):
         # Add Security submodules into sys.path
         sys.path.append(os.path.join(self.pyaicv_fp, 'security'))
         self.installedSecurityParty = {}
         secPts = self.env_cfg['security']
+        valid_sec_pts = []
         for sec in secPts:
             sec_name = sec['name']
             if os.path.exists(os.path.join(self.pyaicv_fp, 'security', sec_name)):
                 logger.debug(f'Importing security module: {sec_name.upper()}')
                 self.installedSecurityParty[sec_name] = importlib.import_module(sec_name)
-                set_aicv_env_variable(key=sec_name.upper(), value=sec)
+                valid_sec_pts.append(sec)
             else:
                 logger.warn(f'{sec_name} security module is not found. Safely ignore this module')
+        set_aicv_env_variable(key='SECURITY', value=valid_sec_pts)
 
 
 project_instance = ProjectInstance()

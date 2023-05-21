@@ -2,6 +2,7 @@ import os
 import sys
 import importlib
 import logging
+import yaml
 
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,11 @@ class SecurityFirmNotSelected(Exception):
 
 class SecurityFirmFactory(dict):
     def __init__(self):
-        self.active_security = None
+        self.warmup()
+
+    def warmup(self):
+        security_cfg = yaml.safe_load(os.environ['AICV_SECURITY'])
+        self.aicv_security = {sec_spec['name']: sec_spec for sec_spec in security_cfg}
 
     def __find_security_module(self, name):
         lower_name = name.lower()
@@ -25,20 +30,15 @@ class SecurityFirmFactory(dict):
             return True
         return False
 
-    def set(self, name):
-        if self.__find_security_module(name):
-            self.__dict__[name] = importlib.import_module(name.lower())
-            self.active_security = self.__dict__[name]
-        else:
-            raise ModuleNotFoundError(f"Security Firm {name} not implemented")
-
     def get(self, name):
+        name = name.lower()
+        if name not in self.__dict__.keys():
+            if self.__find_security_module(name):
+                self.__dict__[name] = importlib.import_module(name.lower())
+                self.__dict__[name].init(self.aicv_security[name])
+            else:
+                raise ModuleNotFoundError(f"Security Firm {name} not implemented")
         return self.__dict__[name]
 
-    def get_active_security(self):
-        if self.active_security is None:
-            raise SecurityFirmNotSelected("Please set Security Firm first")
-        return self.active_security
 
-
-factory = SecurityFirmFactory()
+FACTORY = SecurityFirmFactory()
