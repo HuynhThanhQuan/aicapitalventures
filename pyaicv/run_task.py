@@ -12,7 +12,7 @@ if __name__ == '__main__':
                         description='Commands to operate all activities of AI Capital Ventures ',
                         epilog='Please DM hthquan28@gmail.com to help')
     parser.add_argument('task', help='Config file to setup AI Capital Ventures app',type=int)
-    parser.add_argument('--customer_name', help='Config file to setup AI Capital Ventures app',type=int)
+    parser.add_argument('--customer_name', help='Config file to setup AI Capital Ventures app',type=str)
     args = parser.parse_args()
     
     if args.task == 0:

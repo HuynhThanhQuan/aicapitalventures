@@ -1,4 +1,2 @@
 desc: TESTING
 logLevel: DEBUG
-tokenSetting:
-  expiredTime: 300

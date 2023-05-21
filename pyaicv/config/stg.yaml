@@ -1,4 +1,2 @@
 desc: STAGING
 logLevel: INFO
-tokenSetting:
-  expiredTime: 300

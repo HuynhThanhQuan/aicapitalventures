@@ -1,6 +1,4 @@
 desc: DEVELOPMENT
-tokenSetting:
-  expiredTime: 10800
 remote:
   - name: google_api
     metadata:

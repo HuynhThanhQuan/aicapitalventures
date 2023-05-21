@@ -39,10 +39,6 @@ for dir in [GOOGLE_API_KEYSTORE, GOOGLE_API_KEYSTORE_TMP]:
         os.makedirs(dir)
 
 
-# GDRIVE = os.environ['AICV_KEY_DRIVE']
-# TOKEN_FILE = os.path.join(GDRIVE, 'token.json')
-
-
 class TokenMetadata:
     """
     Class to manage all tokens for editing creds

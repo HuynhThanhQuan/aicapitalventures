@@ -67,6 +67,8 @@ class Downloader:
         else:
             # If exist, read it
             review_data = pd.read_excel(self.reviewedDataVersion.remote.filepath, index_col=0)
+        assert review_data is not None
+        assert isinstance(review_data, pd.DataFrame)
         return review_data
 
     def get_merge_reviewed_data(self):
@@ -107,7 +109,6 @@ class Downloader:
         for f in files:
             self.drive_api.delete_file(f['id'])
         # Upload new one
-        print(filepath, mimeType, file_metadata)
         _id = self.drive_api.upload_DocEditor_file(filepath, mimeType=mimeType, metadata=file_metadata)
         return _id
         
