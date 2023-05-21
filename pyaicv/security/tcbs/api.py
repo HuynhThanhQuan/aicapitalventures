@@ -31,7 +31,7 @@ class APIHandler:
                 else:
                     response = []
                     for c in customers:
-                        response.append(self.tcbs_ops.get_customer_info(name))
+                        response.append(self.tcbs_ops.get_customer_info(c))
         elif self.api == 'upload':
             response = self.tcbs_ops.upload_reviewed_data()
         return response

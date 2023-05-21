@@ -13,6 +13,11 @@ __EXCLUDED__ = [
     '.ipynb_checkpoints'
 ]
 
+
+class ServiceNotImplementedError(Exception):
+    pass
+
+
 class GoogleServiceManagement:
     def __init__(self):
         self.find_google_services()

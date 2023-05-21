@@ -8,9 +8,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-# LOCAL_REPORT_STORAGE = os.environ['AICV_REPORT']
-# SUMMARY_REPORT = os.path.join(LOCAL_REPORT_STORAGE, 'Summary.xlsx')
-
 
 def export_total_asset_value_report(data: pd.DataFrame) -> dict:
     date_rp = data.copy()
@@ -37,6 +34,7 @@ def analyze_customer_performance(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def export_summary_report(data: dict) -> pd.DataFrame:
+    summary_file = os.path.join(os.environ['AICV_DATABASE_LOCAL_REPORT'], 'SummaryReport.xlsx')
     summary_df = None
     for cust_name, report_type_dict in data.items():
         perf_report = analyze_customer_performance(report_type_dict['date'])
@@ -45,7 +43,7 @@ def export_summary_report(data: dict) -> pd.DataFrame:
         perf_report = perf_report.rename(columns={'TotalAssets': 'total_assets'})
         perf_report = perf_report[['customer_name', 'date', 'total_assets', 'diff', 'pct_change']]
         # Export customer's performance report
-        perf_report_fp = os.path.join(LOCAL_REPORT_STORAGE, 'PerformanceReport_' + cust_name + '.xlsx')
+        perf_report_fp = os.path.join(os.environ['AICV_DATABASE_LOCAL_REPORT'], 'PerformanceReport_' + cust_name + '.xlsx')
         utils.convert_strformat_to_save(perf_report).to_excel(perf_report_fp)
         logger.debug(f'Exported Performance Report file of {cust_name} at {perf_report_fp}')
         if summary_df is None:
@@ -55,8 +53,8 @@ def export_summary_report(data: dict) -> pd.DataFrame:
     # summary_df = summary_df.fillna(0)
     if summary_df is not None:
         # summary_df = summary_df.pivot(index='date', columns='customer_name', values=['total_assets', 'diff','pct_change'])
-        utils.convert_strformat_to_save(summary_df).to_excel(SUMMARY_REPORT)
-        logger.debug(f'Exported Summary report file at {SUMMARY_REPORT}')
+        utils.convert_strformat_to_save(summary_df).to_excel(summary_file)
+        logger.debug(f'Exported Summary report file at {summary_file}')
     else:
         logger.error('Unable to export Summary Report, please check it')
     return summary_df

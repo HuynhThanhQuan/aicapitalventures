@@ -18,6 +18,13 @@ class AggregateFileNotFound(FileNotFoundError):
     pass
 
 
+class TCBTransactionHistoryNotFound(FileNotFoundError):
+    pass
+
+
+class UnsupportedFileFormat(Exception):
+    pass
+
 class Downloader:
     def __init__(self, ):
         self.local_store = os.environ['AICV_DATABASE_LOCAL']

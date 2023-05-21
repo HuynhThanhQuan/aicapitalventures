@@ -4,19 +4,17 @@ from datetime import datetime
 import pandas as pd
 
 
-# DRIVE_STORE = os.environ['AICV_DATABASE_DRIVE']
 
 class CustomerCapital:
     def __init__(self):
         pass
-        # self.download_capital_data()
-        # self.read()
 
     def download_capital_data(self):
         mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        saved_file = os.path.join(DRIVE_STORE, 'Capital.xlsx')
-        response = drive.search_capital_file()
-        self.file_io = drive.download_Docs_Editor_file(response['id'], mimeType=mimeType, saved_file=saved_file)
+        saved_file = os.path.join(os.environ['AICV_DATABASE_LOCAL'], 'Capital.xlsx')
+        self.file_io = None
+        # response = drive.search_capital_file()
+        # self.file_io = drive.download_Docs_Editor_file(response['id'], mimeType=mimeType, saved_file=saved_file)
 
     def read(self):
         self.data = pd.read_excel(self.file_io.name)
