@@ -9,6 +9,8 @@ from datetime import datetime
 import re
 
 
+from .data import ReviewDataVersion, RemoteAggregatedData
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -28,8 +30,8 @@ class UnsupportedFileFormat(Exception):
 class Downloader:
     def __init__(self, ):
         self.local_store = os.environ['AICV_DATABASE_LOCAL']
-        self.reviewed_file = os.path.join(self.local_store, 'ReviewedData.xlsx') # ReviewedData = reviewed manually
-        self.aggregate_file = os.path.join(self.local_store, 'ADARP.xlsx') # ADARP = Aggregated Data from All Remote Parties
+        self.reviewedDataVersion = ReviewDataVersion(self.local_store)
+        self.aggregateData = RemoteAggregatedData(self.local_store)
         self.__connectDriveApi()
 
     def __read_spec(self):
@@ -48,33 +50,50 @@ class Downloader:
                 break
 
     def get_latest_reviewed_data(self):
-        if not os.path.exists(self.reviewed_file):
-            # Search & download from remote
-            # Search in Drive
+        review_data = None
+        # Check remote ver existed
+        if not os.path.exists(self.reviewedDataVersion.remote.filepath):
+            # If not search and download it
             files = self.__search_reviewed_data_in_Drive()
             if len(files) == 1:
-                self.__download_reviewed_data_in_Drive()
+                filedownload = self.__download_reviewed_data_in_Drive()
+                if filedownload is not None:
+                    review_data = self.reviewedDataVersion.remote.get_data()
             else:
-                # Create new ReviewedData
+                # If not valid remote ver, then create it from local with agg-data 
                 self.get_latest_aggregated_data()
                 self.__generate_ReviewedData_from_AggregatedData()
+                review_data = self.reviewedDataVersion.local.get_data()
         else:
-            self.reviewed_data = pd.read_excel(self.reviewed_file, index_col=0)
-        return self.reviewed_file
+            # If exist, read it
+            review_data = pd.read_excel(self.reviewedDataVersion.remote.filepath, index_col=0)
+        return review_data
+
+    def get_merge_reviewed_data(self):
+        # local vs remote -> merge ver, this mer ver will be the final-ver 
+        # download remote and prepare local ver
+        # Download remote ver
+        if self.__download_reviewed_data_in_Drive():
+            self.reviewedDataVersion.remote.get_data()
+        # Create local ver
+        self.get_latest_aggregated_data()
+        self.__generate_ReviewedData_from_AggregatedData()
+        # Create merge ver
+        self.reviewedDataVersion.solve_conflicts()
 
     def get_latest_aggregated_data(self):
-        if not os.path.exists(self.aggregate_file):
+        if not os.path.exists(self.aggregateData.filepath):
             self.__download_transaction_history_files()
             self.__aggregate_data()
         else:
-            self.aggregate_data = pd.read_excel(self.aggregate_file, index_col=0)
-        return self.aggregate_file
+            self.aggregateData.get_data()
+        return self.aggregateData.filepath
 
     def upload_reviewed_data(self):
         self.__read_spec()
-        self.get_latest_reviewed_data()
-        filepath = self.reviewed_file
-        name = Path(filepath).name
+        self.get_merge_reviewed_data()
+        filepath = self.reviewedDataVersion.merge.filepath
+        name = self.tcbs_spec['metadata']['audit']['name']
         root = self.tcbs_spec['metadata']['audit']['root']
         mimeType='application/vnd.google-apps.spreadsheet'
         file_metadata = {
@@ -82,25 +101,37 @@ class Downloader:
             'parents': [root],
             'mimeType': mimeType
         }
-        return self.drive_api.upload_DocEditor_file(filepath, mimeType=mimeType, metadata=file_metadata)
-
+        # Replace 
+        # Delete the old ones, if possible
+        files = self.__search_reviewed_data_in_Drive()
+        for f in files:
+            self.drive_api.delete_file(f['id'])
+        # Upload new one
+        print(filepath, mimeType, file_metadata)
+        _id = self.drive_api.upload_DocEditor_file(filepath, mimeType=mimeType, metadata=file_metadata)
+        return _id
+        
     def __search_reviewed_data_in_Drive(self):
         self.__read_spec()
         fname = self.tcbs_spec['metadata']['audit']['name']
         folderRoot = self.tcbs_spec['metadata']['audit']['root']
-        query_statement = f"name = '{fname}' and parents in '{folderRoot}'"
+        query_statement = f"name = '{fname}' and parents in '{folderRoot}' and trashed=false"
         files = self.drive_api.search(query_statement)
         if len(files) > 0:
             logger.debug(f'Searched "{fname}" with IDs {[f["id"] for f in files]} in Drive')
         return files
 
     def __download_reviewed_data_in_Drive(self):
-        self.__read_spec()
-        fname = self.tcbs_spec['metadata']['audit']['name']
-        mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        saved_file=self.reviewed_file
-        self.drive_api.download_DocEditor_file(fname,mimeType,saved_file)
-
+        files = self.__search_reviewed_data_in_Drive()
+        if len(files) ==1 :
+            fileId = files[0]['id']
+            fname = self.tcbs_spec['metadata']['audit']['name']
+            mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            saved_file=self.reviewedDataVersion.remote.filepath
+            return self.drive_api.download_DocEditor_file(fileId,mimeType,saved_file)
+        else:
+            return None
+            
     def __connectRemoteServers(self):
         for serverInfo in self.remoteServers:
             if serverInfo['name'] == 'drive':
@@ -116,25 +147,25 @@ class Downloader:
             serverInfo['data'] = serverInfo['downloader'].latest_data
 
     def __aggregate_data(self):
-        self.aggregate_data = None
         for serverInfo in self.remoteServers:
             data = serverInfo['data']
             if data is not None:
-                if self.aggregate_data is None:
-                    self.aggregate_data = data.copy()
+                if self.aggregateData.data is None:
+                    self.aggregateData.data = data.copy()
                 else:
-                    self.aggregate_data = pd.concat([self.aggregate_data.copy(), data.copy()], ignore_index=True)
-        if self.aggregate_data is not None:
-            self.aggregate_data.to_excel(self.aggregate_file)
+                    self.aggregateData.data = pd.concat([self.aggregateData.data.copy(), data.copy()], ignore_index=True)
+        if self.aggregateData.get_data() is not None:
+            self.aggregateData.get_data().to_excel(self.aggregateData.filepath)
 
     def __generate_ReviewedData_from_AggregatedData(self) -> pd.DataFrame:
-        logger.info('Generate ReviewData from latest aggregated data')
-        self.reviewed_data = self.aggregate_data.copy()
-        for i in self.reviewed_data.columns:
-            self.reviewed_data[i] = self.reviewed_data[i].astype(str)
-        self.reviewed_data.insert(0, 'Khách hàng', [None] * len(self.reviewed_data))
-        self.reviewed_data.to_excel(self.reviewed_file)
-        return self.reviewed_data
+        logger.info('Generate ReviewData local data from latest aggregated data')
+        reviewed_data = self.aggregateData.get_data().copy()
+        for i in reviewed_data.columns:
+            reviewed_data[i] = reviewed_data[i].astype(str)
+        reviewed_data.insert(0, 'Khách hàng', [None] * len(reviewed_data))
+        reviewed_data.to_excel(self.reviewedDataVersion.local.filepath)
+        self.reviewedDataVersion.local.data = reviewed_data
+        return self.reviewedDataVersion.local.get_data()
 
 
 class GoogleDriveServerDownloader:

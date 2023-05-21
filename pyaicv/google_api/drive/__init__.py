@@ -82,7 +82,7 @@ def search(query_statement, spaces='drive', fields='nextPageToken,files(id, name
     return files
 
 
-def delete_drive_file(file_id:str):
+def delete_file(file_id:str):
     try:
         service = build('drive', 'v3', credentials=credential.get_edit_credentials())
         request = service.files().delete(fileId=file_id).execute()
@@ -121,7 +121,6 @@ def download_DocEditor_file(file_id:str, mimeType:str, saved_file:str):
         logger.exception(F'An error occurred: {error}')
         file = None
     return file
-
 
 
 def upload_DocEditor_file(filepath:str, mimeType:str, metadata:dict, resumable=True, fields='id'):

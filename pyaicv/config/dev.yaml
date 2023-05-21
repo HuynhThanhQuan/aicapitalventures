@@ -17,7 +17,7 @@ security:
   - name: tcbs
     metadata:
       audit:
-        name: ReviewedData
+        name: ReviewedData.xlsx
         root: 1d8z3hD6eONCdgPuT6-BHETjy82-nheDh
       remoteServers:
           - name: drive

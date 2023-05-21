@@ -151,10 +151,12 @@ class TokenMetadata:
         return id[:self.short_length]
 
     def get_longId_by_shortId(self, shortId:str):
-        return self.short_id[shortId]
+        if shortId in self.short_id.keys():
+            return self.short_id[shortId]
 
     def get_token_filename_by_longId(self, longId:str):
-        return self.get_token_filename_by_shortId(self.get_shortId_by_longId(longId))
+        shortId = self.get_shortId_by_longId(longId)
+        return self.get_token_filename_by_shortId(shortId)
 
     def get_token_filename_by_shortId(self, shortId:str):
         return 'token.' + shortId + '.json'
